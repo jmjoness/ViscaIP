@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Application
+	x:Class="ViscaIP.App"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:local="using:ViscaIP">
+	<Application.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+					<XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+					<!-- Other merged dictionaries here -->
+			</ResourceDictionary.MergedDictionaries>
+			<!-- Other app resources here -->
+			<SolidColorBrush x:Key="ButtonBackground" Color="Azure" />
+			<SolidColorBrush x:Key="ButtonBackgroundPressed" Color="Azure" />
+			<SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="Gray" />
+			<SolidColorBrush x:Key="ButtonForeground" Color="Black" />
+			<SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="Azure" />
+
+			<!--<SolidColorBrush x:Key="TextBoxButtonPointerOverBackgroundThemeBrush" Color="#000040" />
+			<SolidColorBrush x:Key="TextBoxBackgroundPointerOver" Color="Black" />
+			<SolidColorBrush x:Key="TextBoxBackground" Color="Black" />
+			<SolidColorBrush x:Key="TextBoxThemeBackgroundPointerOver" Color="Black" />
+			<SolidColorBrush x:Key="TextBoxThemeBackground" Color="Black" />
+			<SolidColorBrush x:Key="TextBoxButtonPointerOverForegroundThemeBrush" Color="Azure" />
+			<SolidColorBrush x:Key="TextBoxForegroundPointerOver" Color="Azure" />
+			<SolidColorBrush x:Key="TextBoxForeground" Color="Azure" />
+			<SolidColorBrush x:Key="TextBoxThemeForegroundPointerOver" Color="Azure" />
+			<SolidColorBrush x:Key="TextBoxThemeForeground" Color="Azure" />
+			<SolidColorBrush x:Key="TextControlForeground" Color="Azure" />-->
+
+			<SolidColorBrush x:Key="CheckBoxBorderBrushUnchecked" Color="Azure" />
+			<SolidColorBrush x:Key="CheckBoxForegroundUnchecked" Color="Azure" />
+			<SolidColorBrush x:Key="CheckBoxForegroundChecked" Color="Black" />
+			<SolidColorBrush x:Key="CheckBoxForegroundStrokeChecked" Color="Black" />
+			<SolidColorBrush x:Key="CheckBoxCheckForegroundStrokeChecked" Color="Black" />
+			<SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundChecked" Color="Black" />
+			<SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundCheckedPointerOver" Color="Black" />
+			<SolidColorBrush x:Key="CheckBoxCheckBackground" Color="LightBlue" />
+			<SolidColorBrush x:Key="CheckBoxCheckBackgroundUnchecked" Color="LightBlue" />
+			<SolidColorBrush x:Key="CheckBoxCheckBackgroundChecked" Color="LightBlue" />
+			<SolidColorBrush x:Key="CheckBoxCheckBackgroundFillUnchecked" Color="LightBlue" />
+			<SolidColorBrush x:Key="CheckBoxCheckBackgroundFillChecked" Color="LightBlue" />
+			<SolidColorBrush x:Key="CheckBoxCheckBackgroundStrokeChecked" Color="Black" />
+			<SolidColorBrush x:Key="CheckBoxCheckBackgroundFillUncheckedPointerOver" Color="LightBlue" />
+			<SolidColorBrush x:Key="CheckBoxCheckBackgroundFillCheckedPointerOver" Color="LightBlue" />
+			<SolidColorBrush x:Key="CheckBoxBorderBrushChecked" Color="LightBlue" />
+		</ResourceDictionary>
+	</Application.Resources>
+</Application>

@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "ViscaIP (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "ViscaIP (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

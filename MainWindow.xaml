@@ -1,0 +1,401 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+	x:Class="ViscaIP.MainWindow"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:local="using:ViscaIP"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	mc:Ignorable="d"
+	Title="ViscaIP" 
+	>
+
+	<Window.SystemBackdrop>
+		<MicaBackdrop />
+	</Window.SystemBackdrop>
+
+	<Grid Background="#000040" >
+		<Frame x:Name="ContentFrame" HorizontalAlignment="Left" Loaded="ContentLoaded" />
+
+		<Grid Margin="15,4,0,0">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="50"/>
+				<RowDefinition Height="264"/>
+				<RowDefinition Height="140"/>
+				<RowDefinition Height="360"/>
+			</Grid.RowDefinitions>
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="470"/>
+			</Grid.ColumnDefinitions>
+			<StackPanel Orientation="Horizontal" Grid.Row="0" >
+				<Button HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Height="48" Click="SettingsClick" Background="Transparent" BorderThickness="0,0,0,0">
+					<Image Source="ms-appx:///Assets/settings-white.svg" Width="32" Height="32"/>
+				</Button>
+				<Button HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Height="48" Click="PowerClick" Background="Transparent" BorderThickness="0,0,0,0">
+					<Image x:Name="powerImg" Source="ms-appx:///Assets/power-off.svg" Width="32" Height="32" MinHeight="32" MinWidth="32" />
+				</Button>
+				<TextBox x:Name="modelTextBox" VerticalAlignment="Center" HorizontalAlignment="Center" Background="Azure" Foreground="Black"
+										IsReadOnly="True" Margin="0" Padding="5,3,0,0" Height="28" MinHeight="20" Width="160"/>
+			</StackPanel>
+
+			<Grid Grid.Row="1">
+				<Grid.RowDefinitions>
+					<RowDefinition Height="265"/>
+				</Grid.RowDefinitions>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="390"/>
+					<ColumnDefinition Width="80"/>
+				</Grid.ColumnDefinitions>
+				<Grid Grid.Row="0" Grid.Column="0">
+					<Grid.RowDefinitions>
+						<RowDefinition Height="155"/>
+						<RowDefinition Height="110"/>
+					</Grid.RowDefinitions>
+					<Grid Grid.Column="0" Grid.Row="0">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="210"/>
+							<ColumnDefinition Width="90"/>
+							<ColumnDefinition Width="90"/>
+						</Grid.ColumnDefinitions>
+						<StackPanel Grid.Column="0" Grid.Row="0" BorderThickness="2" BorderBrush="Azure">
+							<TextBlock Text="Pan/Tilt" Foreground="Azure" TextAlignment="Center" Height="18" />
+							<Grid Margin="0,0,0,0">
+								<Grid.ColumnDefinitions >
+									<ColumnDefinition Width="50"/>
+									<ColumnDefinition Width="150"/>
+								</Grid.ColumnDefinitions>
+								<Button x:Name="centerBtn" Click="CenterBtnClick" Content="Ctr" Background="Azure" Foreground="Black"
+										  HorizontalAlignment="Left" Width="40" Margin="5,5,5,0" Padding="4" Grid.Column="0" VerticalAlignment="Top">
+								</Button>
+								<RelativePanel x:Name="ptRect" HorizontalAlignment="Left" Height="120" Width="140"
+													Margin="5,5,0,0" BorderThickness="2" BorderBrush="White" 
+													Grid.Column="1" VerticalAlignment="Top"  
+													PointerPressed="ptRect_MouseDown" PointerReleased="ptRect_MouseUp" PointerMoved="ptRect_MouseMove" >
+									<Image x:Name="ptSvg"
+												Source="ms-appx:///Assets/ptpanel2.svg"
+												Stretch="UniformToFill"
+												RelativePanel.AlignHorizontalCenterWithPanel="True"
+												RelativePanel.AlignVerticalCenterWithPanel="True"/>
+								</RelativePanel>
+
+							</Grid>
+						</StackPanel>
+
+						<StackPanel Grid.Column="1" Grid.Row="0" BorderThickness="2" BorderBrush="Azure">
+							<TextBlock Text="Zoom" Foreground="Azure" TextAlignment="Center" Height="18" />
+							<RelativePanel x:Name="zmRect" HorizontalAlignment="Center" Height="120" Width="60" 
+												Margin="0,5,0,0" BorderThickness="2" BorderBrush="White" 
+												VerticalAlignment="Top" 
+												PointerPressed="zmRect_MouseDown" PointerReleased="zmRect_MouseUp" PointerMoved="zmRect_MouseMove" >
+								<Image x:Name="zmSvg"
+											Source="ms-appx:///Assets/zpanel2.svg"
+											Stretch="UniformToFill"
+											RelativePanel.AlignHorizontalCenterWithPanel="True"
+											RelativePanel.AlignVerticalCenterWithPanel="True"/>
+							</RelativePanel>
+						</StackPanel>
+
+						<StackPanel Grid.Column="2" Grid.Row="0" BorderThickness="2" BorderBrush="Azure">
+							<TextBlock Text="Focus" Foreground="Azure" TextAlignment="Center" Height="18" />
+							<StackPanel Spacing="0">
+								<CheckBox x:Name="focusManual" Content="Manual" Click="FocusManualClick" 
+											 HorizontalAlignment="Left" Margin="8,0,0,0" VerticalAlignment="Top" >
+									<CheckBox.ContentTemplate>
+										<DataTemplate>
+											<Border Background="#000040" >
+												<TextBlock Text="Manual" Foreground="Azure" />
+											</Border>
+										</DataTemplate>
+									</CheckBox.ContentTemplate>
+								</CheckBox>
+								<StackPanel x:Name="focusControlPanel" Orientation="Vertical" Margin="0" >
+									<RelativePanel x:Name="focusRect" HorizontalAlignment="Center" Height="90" Width="60" 
+													Margin="0,2,0,0" BorderThickness="2" BorderBrush="White" VerticalAlignment="Top" 
+													PointerPressed="focusRect_MouseDown" PointerReleased="focusRect_MouseUp" PointerMoved="focusRect_MouseMove" >
+										<Image x:Name="focSvg"
+											Source="ms-appx:///Assets/focpanel2.svg"
+											Stretch="UniformToFill"
+											RelativePanel.AlignHorizontalCenterWithPanel="True"
+											RelativePanel.AlignVerticalCenterWithPanel="True"/>
+									</RelativePanel>
+									<StackPanel x:Name="focusButtonStack" Grid.Column="1" Orientation="Vertical" Margin="0" >
+										<Button x:Name="focusFarBtn" Click="FarBtnClick" Content="Far" Background="Azure" Foreground="Black"
+											  HorizontalAlignment="Left" Width="40" Margin="5,5,5,0" Padding="4" Grid.Column="0" VerticalAlignment="Top">
+										</Button>
+										<Button x:Name="focusNearBtn" Click="NearBtnClick" Content="Near" Background="Azure" Foreground="Black"
+											  HorizontalAlignment="Left" Width="40" Margin="5,5,5,0" Padding="4" Grid.Column="0" VerticalAlignment="Top">
+										</Button>
+									</StackPanel>
+								</StackPanel>
+							</StackPanel>
+						</StackPanel>
+					</Grid>
+					<StackPanel Grid.Column="0" Grid.Row="1" BorderThickness="2" BorderBrush="Azure">
+						<TextBlock Text="Presets" Foreground="Azure" TextAlignment="Center" Height="18" />
+						<Grid>
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="126" />
+								<ColumnDefinition Width="126" />
+								<ColumnDefinition Width="126" />
+							</Grid.ColumnDefinitions>
+							<Grid.RowDefinitions>
+								<RowDefinition Height="42" />
+								<RowDefinition Height="42" />
+							</Grid.RowDefinitions>
+							<Grid.Resources>
+								<Style TargetType="Button">
+									<Setter Property="Width" Value="32" />
+									<Setter Property="Height" Value="32" />
+									<Setter Property="Margin" Value="6,6,0,0" />
+									<Setter Property="Background" Value="azure" />
+									<Setter Property="Foreground" Value="Black" />
+									<Setter Property="VerticalAlignment" Value="Top" />
+									<Setter Property="HorizontalAlignment" Value="Left" />
+									<Setter Property="CornerRadius" Value="4" />
+								</Style>
+								<Style TargetType="TextBox">
+									<Setter Property="Width" Value="84" />
+									<Setter Property="Height" Value="32" />
+									<Setter Property="MinHeight" Value="0" />
+									<!--<Setter Property="Background" Value="Black" />
+									<Setter Property="Foreground" Value="Azure" />-->
+									<Setter Property="Margin" Value="0,6,0,0" />
+									<Setter Property="Padding" Value="4,4,0,0" />
+									<Setter Property="VerticalAlignment" Value="Top" />
+									<Setter Property="HorizontalAlignment" Value="Left" />
+									<Setter Property="CornerRadius" Value="4" />
+									<Setter Property="BorderThickness" Value="0" />
+									<Setter Property="FontSize" Value="16" />
+									<!--<Setter Property="SelectionHighlightColorWhenNotFocused" Value="Azure" />-->
+								</Style>
+							</Grid.Resources>
+							<StackPanel x:Name="p1Panel" Grid.Column="0" Grid.Row="0" Orientation="Horizontal" Spacing="4">
+								<Button x:Name="p1Btn" Content="1" />
+								<TextBox x:Name="p1TextBox" LostFocus="PresetTextChanged" />
+							</StackPanel>
+							<StackPanel x:Name="p2Panel" Grid.Column="1" Grid.Row="0" Orientation="Horizontal" Spacing="4">
+								<Button x:Name="p2Btn" Content="2" />
+								<TextBox x:Name="p2TextBox" LostFocus="PresetTextChanged" />
+							</StackPanel>
+							<StackPanel x:Name="p3Panel" Grid.Column="2" Grid.Row="0" Orientation="Horizontal" Spacing="4">
+								<Button x:Name="p3Btn" Content="3" />
+								<TextBox x:Name="p3TextBox" LostFocus="PresetTextChanged" />
+							</StackPanel>
+							<StackPanel x:Name="p4Panel" Grid.Column="0" Grid.Row="1" Orientation="Horizontal" Spacing="4">
+								<Button x:Name="p4Btn" Content="4" />
+								<TextBox x:Name="p4TextBox" LostFocus="PresetTextChanged" />
+							</StackPanel>
+							<StackPanel x:Name="p5Panel" Grid.Column="1" Grid.Row="1" Orientation="Horizontal" Spacing="4">
+								<Button x:Name="p5Btn" Content="5" />
+								<TextBox x:Name="p5TextBox" LostFocus="PresetTextChanged" />
+							</StackPanel>
+							<StackPanel x:Name="p6Panel" Grid.Column="2" Grid.Row="1" Orientation="Horizontal" Spacing="4">
+								<Button x:Name="p6Btn" Content="6" />
+								<TextBox x:Name="p6TextBox" LostFocus="PresetTextChanged" />
+							</StackPanel>
+						</Grid>
+					</StackPanel>
+				</Grid>
+
+				<StackPanel Grid.Column="1" Grid.Row="0" BorderThickness="2" BorderBrush="Azure">
+					<TextBlock Text="Camera" Foreground="Azure" TextAlignment="Center" Height="18" />
+					<StackPanel Spacing="0">
+						<RadioButton x:Name="C1" Tag="1" GroupName="CameraGroup" Checked="CameraChecked" Foreground="Azure" Padding="4" HorizontalAlignment="Left" Margin="4,1" >
+						</RadioButton>
+						<RadioButton x:Name="C2" Tag="2" GroupName="CameraGroup" Checked="CameraChecked" Foreground="Azure" Padding="4" HorizontalAlignment="Left" Margin="4,1" >
+						</RadioButton>
+						<RadioButton x:Name="C3" Tag="3" GroupName="CameraGroup" Checked="CameraChecked" Foreground="Azure" Padding="4" HorizontalAlignment="Left" Margin="4,1" >
+						</RadioButton>
+						<RadioButton x:Name="C4" Tag="4" GroupName="CameraGroup" Checked="CameraChecked" Foreground="Azure" Padding="4" HorizontalAlignment="Left" Margin="4,1" >
+						</RadioButton>
+						<RadioButton x:Name="C5" Tag="5" GroupName="CameraGroup" Checked="CameraChecked" Foreground="Azure" Padding="4" HorizontalAlignment="Left" Margin="4,1" >
+						</RadioButton>
+						<RadioButton x:Name="C6" Tag="6" GroupName="CameraGroup" Checked="CameraChecked" Foreground="Azure" Padding="4" HorizontalAlignment="Left" Margin="4,1" >
+						</RadioButton>
+						<RadioButton x:Name="C7" Tag="7" GroupName="CameraGroup" Checked="CameraChecked" Foreground="Azure" Padding="4" HorizontalAlignment="Left" Margin="4,1" >
+						</RadioButton>
+					</StackPanel>
+				</StackPanel>
+			</Grid>
+
+			<Grid Grid.Row="2" >
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="250" />
+					<ColumnDefinition Width="220" />
+				</Grid.ColumnDefinitions>
+				<StackPanel Grid.Column="0" BorderThickness="2" BorderBrush="Azure">
+					<TextBlock Text="Exposure" Foreground="Azure" TextAlignment="Center" Height="18" />
+					<Grid>
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="75" />
+							<ColumnDefinition Width="50" />
+							<ColumnDefinition Width="75" />
+							<ColumnDefinition Width="50" />
+						</Grid.ColumnDefinitions>
+						<StackPanel Grid.Column="0" Orientation="Vertical" Margin="10,10,0,0">
+							<CheckBox x:Name="expManualChk" Click="ExpManualClick">
+								<CheckBox.ContentTemplate>
+									<DataTemplate>
+										<TextBlock Foreground="Azure" >
+											Manual
+										</TextBlock>
+									</DataTemplate>
+								</CheckBox.ContentTemplate>
+							</CheckBox>
+							<CheckBox x:Name="expBrightChk" Click="ExpBrightClick">
+								<CheckBox.ContentTemplate>
+									<DataTemplate>
+										<TextBlock Foreground="Azure" >
+											Bright
+										</TextBlock>
+									</DataTemplate>
+								</CheckBox.ContentTemplate>
+							</CheckBox>
+							<CheckBox x:Name="expBacklitChk" Click="ExpBacklitClick" >
+								<CheckBox.ContentTemplate>
+									<DataTemplate>
+										<TextBlock Foreground="Azure" >
+											Backlight
+										</TextBlock>
+									</DataTemplate>
+								</CheckBox.ContentTemplate>
+							</CheckBox>
+						</StackPanel>
+						<StackPanel x:Name="expSlideStack" Grid.Column="1" Orientation="Vertical" Margin="0" BorderBrush="AntiqueWhite">
+							<Slider x:Name="expSlider" Maximum="31" Orientation="Vertical" Height="80" Margin="10,5,0,0" ValueChanged="ExpSliderChanged"/>
+							<TextBox x:Name="expText" IsReadOnly="True" Text="Iris Gain" Foreground="Azure" Background="Transparent" BorderThickness="0" Height="20" MinHeight="16" FontSize="12" Margin="0" Padding="0" />
+						</StackPanel>
+						<StackPanel x:Name="gainButtonStack" Grid.Column="1" Orientation="Vertical" Margin="0" >
+							<Button x:Name="gainUpBtn" HorizontalAlignment="Left" Width="40" Height="28" Background="Azure" Foreground="Black"
+										  Click="GainUp" Margin="6,6,0,0" VerticalAlignment="Top" >
+								<Image Source="ms-appx:///Assets/upbtn.svg" Width="16" Height="16"/>
+							</Button>
+							<Button x:Name="gainDownBtn" HorizontalAlignment="Left" Width="40" Height="28" Background="Azure" Foreground="Black"
+										  Click="GainDown" Margin="6,6,0,0" VerticalAlignment="Top" >
+								<Image Source="ms-appx:///Assets/dnbtn.svg" Width="16" Height="16"/>
+							</Button>
+						</StackPanel>
+						<StackPanel x:Name="expCompManStack" Grid.Column="2" Orientation="Vertical" Margin="10,10,0,0" BorderBrush="AntiqueWhite">
+							<CheckBox x:Name="expCompChk" Click="ExpCompClick" >
+								<CheckBox.ContentTemplate>
+									<DataTemplate>
+										<TextBlock Foreground="Azure" >
+											Exp<LineBreak/>Comp
+										</TextBlock>
+									</DataTemplate>
+								</CheckBox.ContentTemplate>
+							</CheckBox>
+						</StackPanel>
+						<StackPanel x:Name="expCompSlideStack" Grid.Column="3" Orientation="Vertical" Margin="0">
+							<Slider x:Name="expCompSlider" Maximum="14" Orientation="Vertical" Height="80" Margin="10,5,0,0" ValueChanged="ExpCompSliderChanged"/>
+							<TextBox x:Name="expCompText" IsReadOnly="True" Text="Comp" Foreground="Azure" Background="Transparent" BorderThickness="0" Height="20" MinHeight="16" FontSize="12" Margin="0" Padding="0" />
+						</StackPanel>
+						<StackPanel x:Name="expCompButtonStack" Grid.Column="3" Orientation="Vertical" Margin="0">
+							<TextBox IsReadOnly="True" Text="Exp Comp" Foreground="Azure" Background="Transparent" BorderThickness="0" Height="20" MinHeight="16" FontSize="12" Margin="0" Padding="0" />
+							<Button x:Name="expCompUpBtn" HorizontalAlignment="Left" Width="40" Height="28" Background="Azure" Foreground="Black"
+										  Click="ExpCompUp" Margin="6,6,0,0" VerticalAlignment="Top" >
+								<Image Source="ms-appx:///Assets/upbtn.svg" Width="16" Height="16"/>
+							</Button>
+							<Button x:Name="expCompDownBtn" HorizontalAlignment="Left" Width="40" Height="28" Background="Azure" Foreground="Black"
+										  Click="ExpCompDown" Margin="6,6,0,0" VerticalAlignment="Top" >
+								<Image Source="ms-appx:///Assets/dnbtn.svg" Width="16" Height="16"/>
+							</Button>
+						</StackPanel>
+					</Grid>
+				</StackPanel>
+
+				<StackPanel Grid.Column="1" BorderThickness="2" BorderBrush="Azure">
+					<TextBlock Text="Color Balance" Foreground="Azure" TextAlignment="Center" Height="18" />
+					<Grid>
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="120" />
+							<ColumnDefinition Width="50" />
+							<ColumnDefinition Width="50" />
+						</Grid.ColumnDefinitions>
+						<StackPanel Grid.Column="0" Orientation="Vertical" Margin="10,10,0,0">
+							<ComboBox x:Name="wbSelectCombo" SelectionChanged="BalSelectChanged" Background="Azure" Foreground="Black" >
+							</ComboBox>
+							<Button x:Name="wbTriggerBtn" Content="Trigger" Click="BalTriggerBtnClick" Background="Azure" Foreground="Black" />
+						</StackPanel>
+						<StackPanel x:Name="wbRedSliderStack" Grid.Column="1" Orientation="Vertical" Margin="0">
+							<Slider x:Name="wbRedSlider" Minimum="0" Maximum="255" Orientation="Vertical" Height="80" Margin="10,5,0,0" ValueChanged="BalRedSliderChanged" >
+								<Slider.Resources>
+									<SolidColorBrush x:Key="SliderThumbBackground" Color="Red"/>
+									<SolidColorBrush x:Key="SliderThumbBackgroundPointerOver" Color="Red"/>
+									<SolidColorBrush x:Key="SliderThumbBackgroundPressed" Color="Red"/>
+									<SolidColorBrush x:Key="SliderTrackFill" Color="Red"/>
+									<SolidColorBrush x:Key="SliderTrackFillPointerOver" Color="Red"/>
+									<SolidColorBrush x:Key="SliderTrackFillPressed" Color="Red"/>
+								</Slider.Resources>
+							</Slider>
+							<TextBox x:Name="wbRedText" IsReadOnly="True" Text="Comp" Foreground="Azure" Background="Transparent" BorderThickness="0" Height="20" MinHeight="16" FontSize="12" Margin="0" Padding="0" />
+						</StackPanel>
+						<StackPanel x:Name="wbRedButtonStack" Grid.Column="1" Orientation="Vertical" Margin="0" >
+							<Button x:Name="redGainUpBtn" HorizontalAlignment="Left" Width="40" Height="28" Background="Azure" Foreground="Black"
+										  Click="RedGainUp" Margin="6,6,0,0" VerticalAlignment="Top" >
+								<Image Source="ms-appx:///Assets/upbtn.svg" Width="16" Height="16"/>
+							</Button>
+							<Button x:Name="redGainDownBtn" HorizontalAlignment="Left" Width="40" Height="28" Background="Azure" Foreground="Black"
+										  Click="RedGainDown" Margin="6,6,0,0" VerticalAlignment="Top" >
+								<Image Source="ms-appx:///Assets/dnbtn.svg" Width="16" Height="16"/>
+							</Button>
+							<TextBox x:Name="wbRedLabel" IsReadOnly="True" Text="Red" Foreground="Azure" Background="Red" BorderThickness="0" Height="20" MinHeight="16" 
+										TextAlignment="Center" Width="30" MinWidth="30" FontSize="12" Margin="6,6,0,0" Padding="0" />
+						</StackPanel>
+						<StackPanel x:Name="wbBlueSliderStack" Grid.Column="2" Orientation="Vertical" Margin="0">
+							<Slider x:Name="wbBlueSlider" Minimum="0" Maximum="255" Orientation="Vertical" Height="80" Margin="10,5,0,0" ValueChanged="BalBlueSliderChanged">
+								<Slider.Resources>
+									<SolidColorBrush x:Key="SliderThumbBackground" Color="Blue"/>
+									<SolidColorBrush x:Key="SliderThumbBackgroundPointerOver" Color="Blue"/>
+									<SolidColorBrush x:Key="SliderThumbBackgroundPressed" Color="Blue"/>
+									<SolidColorBrush x:Key="SliderTrackFill" Color="Blue"/>
+									<SolidColorBrush x:Key="SliderTrackFillPointerOver" Color="Blue"/>
+									<SolidColorBrush x:Key="SliderTrackFillPressed" Color="Blue"/>
+								</Slider.Resources>
+							</Slider>
+							<TextBox x:Name="wbBlueText" IsReadOnly="True" Text="Comp" Foreground="Azure" Background="Transparent" BorderThickness="0" Height="20" MinHeight="16" FontSize="12" Margin="0" Padding="0" />
+						</StackPanel>
+						<StackPanel x:Name="wbBlueButtonStack" Grid.Column="2" Orientation="Vertical" Margin="0" >
+							<Button x:Name="blueGainUpBtn" HorizontalAlignment="Left" Width="40" Height="28" Background="Azure" Foreground="Black"
+                                            Click="BlueGainUp" Margin="6,6,0,0" VerticalAlignment="Top" >
+								<Image Source="ms-appx:///Assets/upbtn.svg" Width="16" Height="16"/>
+							</Button>
+							<Button x:Name="blueGainDownBtn" HorizontalAlignment="Left" Width="40" Height="28" Background="Azure" Foreground="Black"
+										  Click="BlueGainDown" Margin="6,6,0,0" VerticalAlignment="Top" >
+								<Image Source="ms-appx:///Assets/dnbtn.svg" Width="16" Height="16"/>
+							</Button>
+							<TextBox x:Name="wbBlueLabel" IsReadOnly="True" Text="Blue" Foreground="Azure" Background="Blue" BorderThickness="0" Height="20" MinHeight="16" 
+										TextAlignment="Center" Width="30" MinWidth="30" FontSize="12" Margin="6,6,0,0" Padding="0" />
+						</StackPanel>
+					</Grid>
+				</StackPanel>
+			</Grid>
+
+			<Grid Grid.Row="3" >
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="380" />
+					<ColumnDefinition Width="90" />
+				</Grid.ColumnDefinitions>
+				<StackPanel Grid.Column="0" BorderThickness="2" BorderBrush="Azure" Margin="0" Height="320">
+					<!--<ListBox x:Name="responseListBox" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="0" Height="316" MinHeight="205" MinWidth="400" BorderBrush="White" >-->
+					<ListBox x:Name="responseListBox" Margin="0" Height="316" MinHeight="205" MinWidth="400" BorderBrush="White" >
+						<ListBox.ItemTemplate>
+							<DataTemplate>
+								<TextBlock Text="{Binding}" FontFamily="Consolas" FontSize="12" Height="16" Margin="1" Padding="0" />
+							</DataTemplate>
+						</ListBox.ItemTemplate>
+						<ListBox.ItemContainerStyle>
+							<Style TargetType="ListBoxItem">
+								<Setter Property="Height" Value="16"/>
+								<Setter Property="Margin" Value="1"/>
+								<Setter Property="Padding" Value="0"/>
+							</Style>
+						</ListBox.ItemContainerStyle>
+					</ListBox>
+				</StackPanel>
+				<StackPanel Grid.Column="1" BorderThickness="2" BorderBrush="Azure" Margin="0" Height="320">
+				</StackPanel>
+			</Grid>
+		</Grid>
+	</Grid>
+</Window>

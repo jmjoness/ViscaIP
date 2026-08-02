@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="144" height="118" viewBox="0 0 144 118" xml:space="preserve">
+	<defs>
+		<radialGradient id="midToEdge" cx="50%" cy="50%" r="50%">
+			<stop offset="0%" stop-color="#ffffff" /> <!-- middle color: blue -->
+			<stop offset="100%" stop-color="#0000ff" /> <!-- edge color: white -->
+		</radialGradient>
+	</defs>
+
+	<rect width="144" height="118" x="0" y="0" fill="url(#midToEdge)"/>
+</svg>
