@@ -111,7 +111,7 @@
 								<StackPanel x:Name="focusControlPanel" Orientation="Vertical" Margin="0" >
 									<RelativePanel x:Name="focusRect" HorizontalAlignment="Center" Height="90" Width="60" 
 													Margin="0,2,0,0" BorderThickness="2" BorderBrush="White" VerticalAlignment="Top" 
-													PointerPressed="focusRect_MouseDown" PointerReleased="focusRect_MouseUp" PointerMoved="focusRect_MouseMove" >
+													PointerPressed="FocusRect_MouseDown" PointerReleased="FocusRect_MouseUp" PointerMoved="FocusRect_MouseMove" >
 										<Image x:Name="focSvg"
 											Source="ms-appx:///Assets/focpanel2.svg"
 											Stretch="UniformToFill"
@@ -119,12 +119,12 @@
 											RelativePanel.AlignVerticalCenterWithPanel="True"/>
 									</RelativePanel>
 									<StackPanel x:Name="focusButtonStack" Grid.Column="1" Orientation="Vertical" Margin="0" >
-										<Button x:Name="focusFarBtn" Click="FarBtnClick" Content="Far" Background="Azure" Foreground="Black"
+										<!--<Button x:Name="focusFarBtn" Click="FarBtnClick" Content="Far" Background="Azure" Foreground="Black"
 											  HorizontalAlignment="Left" Width="40" Margin="5,5,5,0" Padding="4" Grid.Column="0" VerticalAlignment="Top">
 										</Button>
 										<Button x:Name="focusNearBtn" Click="NearBtnClick" Content="Near" Background="Azure" Foreground="Black"
 											  HorizontalAlignment="Left" Width="40" Margin="5,5,5,0" Padding="4" Grid.Column="0" VerticalAlignment="Top">
-										</Button>
+										</Button>-->
 									</StackPanel>
 								</StackPanel>
 							</StackPanel>
@@ -200,19 +200,19 @@
 				<StackPanel Grid.Column="1" Grid.Row="0" BorderThickness="2" BorderBrush="Azure">
 					<TextBlock Text="Camera" Foreground="Azure" TextAlignment="Center" Height="18" />
 					<StackPanel Spacing="0">
-						<RadioButton x:Name="C1" Tag="1" GroupName="CameraGroup" Checked="CameraChecked" Foreground="Azure" Padding="4" HorizontalAlignment="Left" Margin="4,1" >
+						<RadioButton x:Name="C1" Tag="1" Content ="1" GroupName="CameraGroup" Checked="CameraChecked" Foreground="Azure" Padding="4" HorizontalAlignment="Left" Margin="4,1" >
 						</RadioButton>
-						<RadioButton x:Name="C2" Tag="2" GroupName="CameraGroup" Checked="CameraChecked" Foreground="Azure" Padding="4" HorizontalAlignment="Left" Margin="4,1" >
+						<RadioButton x:Name="C2" Tag="2" Content ="2" GroupName="CameraGroup" Checked="CameraChecked" Foreground="Azure" Padding="4" HorizontalAlignment="Left" Margin="4,1" >
 						</RadioButton>
-						<RadioButton x:Name="C3" Tag="3" GroupName="CameraGroup" Checked="CameraChecked" Foreground="Azure" Padding="4" HorizontalAlignment="Left" Margin="4,1" >
+						<RadioButton x:Name="C3" Tag="3" Content ="3" GroupName="CameraGroup" Checked="CameraChecked" Foreground="Azure" Padding="4" HorizontalAlignment="Left" Margin="4,1" >
 						</RadioButton>
-						<RadioButton x:Name="C4" Tag="4" GroupName="CameraGroup" Checked="CameraChecked" Foreground="Azure" Padding="4" HorizontalAlignment="Left" Margin="4,1" >
+						<RadioButton x:Name="C4" Tag="4" Content ="4" GroupName="CameraGroup" Checked="CameraChecked" Foreground="Azure" Padding="4" HorizontalAlignment="Left" Margin="4,1" >
 						</RadioButton>
-						<RadioButton x:Name="C5" Tag="5" GroupName="CameraGroup" Checked="CameraChecked" Foreground="Azure" Padding="4" HorizontalAlignment="Left" Margin="4,1" >
+						<RadioButton x:Name="C5" Tag="5" Content ="5" GroupName="CameraGroup" Checked="CameraChecked" Foreground="Azure" Padding="4" HorizontalAlignment="Left" Margin="4,1" >
 						</RadioButton>
-						<RadioButton x:Name="C6" Tag="6" GroupName="CameraGroup" Checked="CameraChecked" Foreground="Azure" Padding="4" HorizontalAlignment="Left" Margin="4,1" >
+						<RadioButton x:Name="C6" Tag="6" Content ="6" GroupName="CameraGroup" Checked="CameraChecked" Foreground="Azure" Padding="4" HorizontalAlignment="Left" Margin="4,1" >
 						</RadioButton>
-						<RadioButton x:Name="C7" Tag="7" GroupName="CameraGroup" Checked="CameraChecked" Foreground="Azure" Padding="4" HorizontalAlignment="Left" Margin="4,1" >
+						<RadioButton x:Name="C7" Tag="7" Content ="7" GroupName="CameraGroup" Checked="CameraChecked" Foreground="Azure" Padding="4" HorizontalAlignment="Left" Margin="4,1" >
 						</RadioButton>
 					</StackPanel>
 				</StackPanel>
@@ -315,7 +315,7 @@
 						<StackPanel Grid.Column="0" Orientation="Vertical" Margin="10,10,0,0">
 							<ComboBox x:Name="wbSelectCombo" SelectionChanged="BalSelectChanged" Background="Azure" Foreground="Black" >
 							</ComboBox>
-							<Button x:Name="wbTriggerBtn" Content="Trigger" Click="BalTriggerBtnClick" Background="Azure" Foreground="Black" />
+							<!--<Button x:Name="wbTriggerBtn" Content="Trigger" Click="BalTriggerBtnClick" Background="Azure" Foreground="Black" />-->
 						</StackPanel>
 						<StackPanel x:Name="wbRedSliderStack" Grid.Column="1" Orientation="Vertical" Margin="0">
 							<Slider x:Name="wbRedSlider" Minimum="0" Maximum="255" Orientation="Vertical" Height="80" Margin="10,5,0,0" ValueChanged="BalRedSliderChanged" >
@@ -328,7 +328,7 @@
 									<SolidColorBrush x:Key="SliderTrackFillPressed" Color="Red"/>
 								</Slider.Resources>
 							</Slider>
-							<TextBox x:Name="wbRedText" IsReadOnly="True" Text="Comp" Foreground="Azure" Background="Transparent" BorderThickness="0" Height="20" MinHeight="16" FontSize="12" Margin="0" Padding="0" />
+							<!--<TextBox x:Name="wbRedText" IsReadOnly="True" Text="Comp" Foreground="Azure" Background="Transparent" BorderThickness="0" Height="20" MinHeight="16" FontSize="12" Margin="0" Padding="0" />-->
 						</StackPanel>
 						<StackPanel x:Name="wbRedButtonStack" Grid.Column="1" Orientation="Vertical" Margin="0" >
 							<Button x:Name="redGainUpBtn" HorizontalAlignment="Left" Width="40" Height="28" Background="Azure" Foreground="Black"
@@ -339,8 +339,8 @@
 										  Click="RedGainDown" Margin="6,6,0,0" VerticalAlignment="Top" >
 								<Image Source="ms-appx:///Assets/dnbtn.svg" Width="16" Height="16"/>
 							</Button>
-							<TextBox x:Name="wbRedLabel" IsReadOnly="True" Text="Red" Foreground="Azure" Background="Red" BorderThickness="0" Height="20" MinHeight="16" 
-										TextAlignment="Center" Width="30" MinWidth="30" FontSize="12" Margin="6,6,0,0" Padding="0" />
+							<!--<TextBox x:Name="wbRedLabel" IsReadOnly="True" Text="Red" Foreground="Azure" Background="Red" BorderThickness="0" Height="20" MinHeight="16" 
+										TextAlignment="Center" Width="30" MinWidth="30" FontSize="12" Margin="6,6,0,0" Padding="0" />-->
 						</StackPanel>
 						<StackPanel x:Name="wbBlueSliderStack" Grid.Column="2" Orientation="Vertical" Margin="0">
 							<Slider x:Name="wbBlueSlider" Minimum="0" Maximum="255" Orientation="Vertical" Height="80" Margin="10,5,0,0" ValueChanged="BalBlueSliderChanged">
@@ -353,7 +353,7 @@
 									<SolidColorBrush x:Key="SliderTrackFillPressed" Color="Blue"/>
 								</Slider.Resources>
 							</Slider>
-							<TextBox x:Name="wbBlueText" IsReadOnly="True" Text="Comp" Foreground="Azure" Background="Transparent" BorderThickness="0" Height="20" MinHeight="16" FontSize="12" Margin="0" Padding="0" />
+							<!--<TextBox x:Name="wbBlueText" IsReadOnly="True" Text="Comp" Foreground="Azure" Background="Transparent" BorderThickness="0" Height="20" MinHeight="16" FontSize="12" Margin="0" Padding="0" />-->
 						</StackPanel>
 						<StackPanel x:Name="wbBlueButtonStack" Grid.Column="2" Orientation="Vertical" Margin="0" >
 							<Button x:Name="blueGainUpBtn" HorizontalAlignment="Left" Width="40" Height="28" Background="Azure" Foreground="Black"
@@ -364,8 +364,8 @@
 										  Click="BlueGainDown" Margin="6,6,0,0" VerticalAlignment="Top" >
 								<Image Source="ms-appx:///Assets/dnbtn.svg" Width="16" Height="16"/>
 							</Button>
-							<TextBox x:Name="wbBlueLabel" IsReadOnly="True" Text="Blue" Foreground="Azure" Background="Blue" BorderThickness="0" Height="20" MinHeight="16" 
-										TextAlignment="Center" Width="30" MinWidth="30" FontSize="12" Margin="6,6,0,0" Padding="0" />
+							<!--<TextBox x:Name="wbBlueLabel" IsReadOnly="True" Text="Blue" Foreground="Azure" Background="Blue" BorderThickness="0" Height="20" MinHeight="16" 
+										TextAlignment="Center" Width="30" MinWidth="30" FontSize="12" Margin="6,6,0,0" Padding="0" />-->
 						</StackPanel>
 					</Grid>
 				</StackPanel>

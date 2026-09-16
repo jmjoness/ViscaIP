@@ -2,28 +2,27 @@
 using Windows.Storage;
 
 namespace ViscaIP {
-	//enum Mode { D70, D30 };
 
 	class Config {
 		const string PortStr = "Port";
 		const string SpeedStr = "Speed";
 		const string LocXStr = "LocX";
 		const string LocYStr = "LocY";
-		const string ModeStr = "Mode";
 		const string DebugStr = "Debug";
 		const string MiniStr = "Mini";
-		const string InitStr = "Init";
 		const string LogStr = "Log";
-		const string InstanceStr = "Instance";
-		static string CalibratedStr = "Calibrated";
-		static string CalibrationXMinStr = "CalibrationXMin";
-		static string CalibrationXMaxStr = "CalibrationXMax";
-		static string CalibrationYMinStr = "CalibrationYMin";
-		static string CalibrationYMaxStr = "CalibrationYMax";
-		static string CalibrationZMinStr = "CalibrationZMin";
-		static string CalibrationZMaxStr = "CalibrationZMax";
+		readonly static string[] CameraStrs = [ "Camera0", "Camera1", "Camera2", "Camera3", "Camera4", "Camera5", "Camera6" ];
+		//readonly static string[] PresetStrs = [ "Preset0", "Preset1", "Preset2", "Preset3", "Preset4", "Preset5" ];
+		readonly static string[] PresetAry = [ "PresetCam1", "PresetCam2", "PresetCam3", "PresetCam4", "PresetCam5", "PresetCam6", "PresetCam7" ];
+		const string CalibratedStr = "Calibrated";
+		const string CalibrationXMinStr = "CalibrationXMin";
+		const string CalibrationXMaxStr = "CalibrationXMax";
+		const string CalibrationYMinStr = "CalibrationYMin";
+		const string CalibrationYMaxStr = "CalibrationYMax";
+		const string CalibrationZMinStr = "CalibrationZMin";
+		const string CalibrationZMaxStr = "CalibrationZMax";
 
-		public static string[] CameraModelStrs = { "Aver cam520 Pro", "Aver cam520 Pro v3" };
+		public readonly static string[] CameraModelStrs = ["Sony BRC-X1000", "Sony SRG-X120", "AVer CAM520"];
 
 		static int m_number = 0;
 
@@ -45,6 +44,16 @@ namespace ViscaIP {
 			return rtn;
 		}
 
+		static string[] GetArray(string keyStr) {
+			string[] result = [ "", "", "", "", "", "" ];
+			string value = GetString(keyStr, "");
+			string[] valueAry = value.Split('|');
+			for (int i = 0; i < valueAry.Length && i < result.Length; i++) {
+				result[i] = valueAry[i];
+			}
+			return result;
+		}
+
 		static bool SetBool(string keyStr, bool value) {
 			var localSettings = ApplicationData.Current.LocalSettings;
 			localSettings.Values[keyStr] = value;
@@ -62,10 +71,10 @@ namespace ViscaIP {
 			localSettings.Values[keyStr] = value;
 			return value;
 		}
-		static public bool Init
-		{
-			get { return GetBool(InitStr, false); } 
-			set { SetBool(InitStr, value); }
+
+		static void SetArray(string keyStr, string[] value) {
+			string result = string.Join('|', value);
+			SetString(keyStr, result);
 		}
 
 		static public string Port
@@ -83,10 +92,7 @@ namespace ViscaIP {
 		static public Point Location
 		{
 			get {
-				Point p = new();
-				p.X = GetInt(LocXStr, 0);
-				p.Y = GetInt(LocYStr, 0);
-				return p;
+				return new Point(GetInt(LocXStr, 0), GetInt(LocYStr, 0));
 			}
 			set {
 				SetInt(LocXStr, value.X);
@@ -110,12 +116,6 @@ namespace ViscaIP {
 			get { return GetBool(MiniStr, false); }
 			set { SetBool(MiniStr, value); }
 		}
-
-		//static public Mode Mode
-		//{
-		//	get { return (GetString(ModeStr, "D70") == "D30") ? Mode.D30 : Mode.D70; }
-		//	set { SetString(ModeStr, (value == Mode.D30) ? "D30" : "D70"); }
-		//}
 
 		static public bool Calibrated {
 			get { return GetBool(CalibratedStr, false); }
@@ -152,40 +152,34 @@ namespace ViscaIP {
 			set { SetInt(CalibrationZMaxStr, value); }
 		}
 
-		static public string[] GetCamera(int n)
+		static public string[] GetCamera(uint n)
 		{
-			string key = $"Camera{n}";
-			string str = GetString(key, "");
-			string[] data = str.Split('|');
-			return data;
+			if (n < 8) {
+				return GetArray(CameraStrs[n-1]);
+			} else {
+				return ["", "", "", "", "", ""];
+			} 
 		}
 
-		static public void SetCamera(int n, string[] ary)
+		static public void SetCamera(uint n, string[] str)
 		{
-			string key = $"Camera{n}";
-			string str = "";
-			for (int i  = 0; i < ary.Length; i++) {
-				if (str.Length > 0) {
-					str += "|";
-				}
-				str += ary[i];
+			if (n < 8) {
+				SetArray(CameraStrs[n-1], str);
 			}
-			SetString(key, str);
 		}
 
-		static public void SetPreset(int camNum, uint n, string str)
-		{
+		static public string[] GetPresets(uint n) {
+			if (n < 7) {
+				return GetArray(PresetAry[n]);
+			} else {
+				return [ "", "", "", "", "", "" ];
+			}
+		}
+
+		static public void SetPresets(uint n, string[] str) {
 			if (n < 6) {
-				string[] ary = GetCamera(camNum);
-				ary[4 + n] = str;
-				SetCamera(camNum, ary);
+				SetArray(PresetAry[n], str);
 			}
-		}
-
-		static public int Instance
-		{
-			get { return GetInt(InstanceStr, 0); }
-			set { SetInt(InstanceStr, value); }
 		}
 
 		public Config()
