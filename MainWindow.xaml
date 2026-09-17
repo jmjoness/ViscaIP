@@ -70,7 +70,7 @@
 								<RelativePanel x:Name="ptRect" HorizontalAlignment="Left" Height="120" Width="140"
 													Margin="5,5,0,0" BorderThickness="2" BorderBrush="White" 
 													Grid.Column="1" VerticalAlignment="Top"  
-													PointerPressed="ptRect_MouseDown" PointerReleased="ptRect_MouseUp" PointerMoved="ptRect_MouseMove" >
+													PointerPressed="PtRect_MouseDown" PointerReleased="PtRect_MouseUp" PointerMoved="PtRect_MouseMove" >
 									<Image x:Name="ptSvg"
 												Source="ms-appx:///Assets/ptpanel2.svg"
 												Stretch="UniformToFill"
@@ -86,7 +86,7 @@
 							<RelativePanel x:Name="zmRect" HorizontalAlignment="Center" Height="120" Width="60" 
 												Margin="0,5,0,0" BorderThickness="2" BorderBrush="White" 
 												VerticalAlignment="Top" 
-												PointerPressed="zmRect_MouseDown" PointerReleased="zmRect_MouseUp" PointerMoved="zmRect_MouseMove" >
+												PointerPressed="ZmRect_MouseDown" PointerReleased="ZmRect_MouseUp" PointerMoved="ZmRect_MouseMove" >
 								<Image x:Name="zmSvg"
 											Source="ms-appx:///Assets/zpanel2.svg"
 											Stretch="UniformToFill"

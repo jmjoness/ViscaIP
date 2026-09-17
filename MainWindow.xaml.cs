@@ -95,14 +95,7 @@ namespace ViscaIP {
 			{ CommandType.INQ_DeviceType, 0x02 },
 			{ CommandType.INQ_PanTiltPos, 0x12 }
 		};
-		readonly static Dictionary<PayloadType, byte[]> payloadBytesMap = new() {
-			{ PayloadType.Command, new byte[] { 0x00 } },
-			{ PayloadType.Inquiry, new byte[] { 0x10 } },
-			{ PayloadType.ComInqReply, new byte[] { 0x11 } },
-			{ PayloadType.Setting, new byte[] { 0x20 } },
-			{ PayloadType.Control, new byte[] { 0x00 } },
-			{ PayloadType.ControlReply, new byte[] { 0x01 } }
-		};
+
 		readonly Dictionary<int, string> vendorMap = new() {
 			{ 0x01, "Sony" },
 			{ 0x03, "Everet" },
@@ -170,8 +163,8 @@ namespace ViscaIP {
 
 		readonly	static MsgQueue msgQueue = new();
 		static CommandType lastCmdType = CommandType.None;
-		static DateTime lastSend = DateTime.Now;
-		static int lastMsgNum = 0;
+		//static DateTime lastSend = DateTime.Now;
+		//static int lastMsgNum = 0;
 
 		public bool keepReading = false;
 
@@ -183,7 +176,7 @@ namespace ViscaIP {
 		static string cameraAddress = "";
 		static int cameraPort = 0;
 		static string cameraModel = "";
-		static ControlFeature[]? modelFeatures = [];
+		readonly static ControlFeature[]? modelFeatures = [];
 		static int firstCamera = 0;
 
 		static byte panRate = 1;
@@ -294,7 +287,7 @@ namespace ViscaIP {
 
 		private void ContentLoaded(object sender, RoutedEventArgs e) {
 			try {
-				setControlsState();
+				SetControlsState();
 
 				loaded = true;
 
@@ -330,7 +323,7 @@ namespace ViscaIP {
 				for (uint i = 1; i < 8; i++) {
 					string[] camAry = Config.GetCamera(i);
 					if ((camAry.Length > 0) && (camAry[0] != "")) {
-						DeviceInfo info = new DeviceInfo {
+						DeviceInfo info = new() {
 							url = camAry[0],
 							port = camAry[1],
 							name = camAry[2],
@@ -354,7 +347,7 @@ namespace ViscaIP {
 				presetPanels = [p1Panel, p2Panel, p3Panel, p4Panel, p5Panel, p6Panel];
 
 				ShowPowerState(powerOn);
-				showCameras();
+				ShowCameras();
 
 				RadioButton btn = deviceButtons[firstCamera - 1];
 				btn.IsChecked = true;
@@ -370,7 +363,8 @@ namespace ViscaIP {
 				}
 
 				//string modelName = cameraSettings[3];
-				//modelTextBox.Text = modelName;
+				string modelName = deviceInfos[firstCamera - 1].model;
+				modelTextBox.Text = modelName;
 
 				//cameraFeatures.TryGetValue(modelName, out modelFeatures);
 
@@ -420,7 +414,7 @@ namespace ViscaIP {
 			DFO("init");
 		}
 
-		private void showCameras() {
+		private void ShowCameras() {
 			for (uint i = 0; i < 7; i++) {
 				if (i < cameraCount) {
 					deviceButtons[(int)i].Visibility = Visibility.Visible;
@@ -444,7 +438,7 @@ namespace ViscaIP {
 			}
 		}
 
-		private void setControlsState() {
+		private void SetControlsState() {
 			this.DispatcherQueue.TryEnqueue(() => {
 
 				foreach (Button b in presetButtons) {
@@ -455,15 +449,14 @@ namespace ViscaIP {
 					t.IsEnabled = true;
 				}
 
-				displayBrightMode(false);
-				displayExpComp(false);
-				balanceSetup();
+				DisplayBrightMode(false);
+				DisplayExpComp(false);
+				BalanceSetup();
 			});
 		}
 
 		private void ShowPowerState(bool on) {
 			try {
-				Debug.WriteLine($"ShowPowerState({on})");	
 				this.DispatcherQueue.TryEnqueue(() => {
 					string state = on ? "on" : "off";
 					powerImg.Source = new SvgImageSource(new Uri($"ms-appx:///Assets/power-{state}.svg"));
@@ -484,18 +477,18 @@ namespace ViscaIP {
 				appWindow?.Resize(new Windows.Graphics.SizeInt32(510, Config.Debug ? 850 : 510));
 			}
 
-			showCameras();
+			ShowCameras();
 		}
 
 		private void PowerClick(object sender, RoutedEventArgs e) {
 			if (!powerOn) {
-				byte[] d = { 0x02};
+				byte[] d = [ 0x02 ];
 				SendCommand(CommandType.CMD_Power, d, "on");
 				powerOn = true;
 				ShowPowerState(powerOn);
-				setControlsState();
+				SetControlsState();
 			} else {
-				byte[] d = { 0x03};
+				byte[] d = [ 0x03];
 				SendCommand(CommandType.CMD_Power, d, "off");
 				powerOn = false;
 				ShowPowerState(powerOn);
@@ -503,7 +496,7 @@ namespace ViscaIP {
 		}
 
 		#region Send
-		private List<byte> MakeMessage(VMessage msg) {
+		private static List<byte> MakeMessage(VMessage msg) {
 			List<byte> msgList = [];
 			ushort pLength = (ushort)(msg.data.Length + 4);
 
@@ -544,16 +537,16 @@ namespace ViscaIP {
 				List<byte> msgBytes = MakeMessage(msg);
 				Send(msg, msgBytes);
 			} else {
-				DFO($"QUE: {msg.cmdType.ToString()}");
+				DFO($"QUE: {msg.cmdType}");
 				msgQueue.Enqueue(msg);
 			}
 		}
 
 		private void Send(VMessage msg, List<byte> msgBytes) {
-			UdpClient client = new UdpClient();
+			UdpClient client = new();
 
 			try {
-				IPEndPoint? ep = new IPEndPoint(IPAddress.Parse(cameraAddress), cameraPort); // Destination
+				IPEndPoint? ep = new(IPAddress.Parse(cameraAddress), cameraPort); // Destination
 
 				byte[] msgAry = [..msgBytes];
 					// Send the message to the specified endpoint
@@ -563,7 +556,7 @@ namespace ViscaIP {
 				}
 				string info = $"{msg.cmdType} {msg.comment}";
 					
-				DFO($"SND: {info.PadRight(20)} - {msgStr}");
+				DFO($"SND: {info, -20} - {msgStr}");
 				int sendCount = client.Send(msgAry, msgBytes.Count, ep);
 				lastCmdType = msg.cmdType;
 
@@ -593,7 +586,7 @@ namespace ViscaIP {
 				udpClient = new UdpClient(port);
 				while (udpClient != null) {
 					//Debug.WriteLine("wait for receive");
-					using CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
+					using CancellationTokenSource cts = new(TimeSpan.FromSeconds(3));
 					UdpReceiveResult result = await udpClient.ReceiveAsync(cts.Token);
 					byte[] bytes = result.Buffer;
 					string hex = Convert.ToHexString(bytes);
@@ -602,13 +595,10 @@ namespace ViscaIP {
 					if ((bytes[0] == 0x01) && (bytes[1] == 0x11)) {
 						byte[] reply = new byte[len];
 						Array.Copy(bytes, 8, reply, 0, len);
-						Debug.WriteLine($"payload: {Convert.ToHexString(reply)}");
-
-						handleResponse(reply);
+						HandleResponse(reply);
 					}
 				}
 			} catch (OperationCanceledException) {
-				Debug.WriteLine($"---receive timed out {msg.cmdType}, {msg.sequence}");
 				DFO($"---receive timed out {msg.cmdType}, {msg.sequence}");
 				FinishMessage();
 				//if (lastCmdType == CommandType.CMD_Power) {
@@ -621,36 +611,35 @@ namespace ViscaIP {
 		}
 
 		private void FinishMessage() {
-			Debug.WriteLine($"Finishing message {lastCmdType}");
-			if (udpClient != null) {
-				udpClient.Close();
-				udpClient = null;
-			}
+			udpClient?.Close();
+			udpClient = null;
 
 			lastCmdType = CommandType.None;
 			if (!msgQueue.Empty) {
-				VMessage msg = new VMessage();
+				VMessage msg = new();
 				msgQueue.Dequeue(ref msg);
 				SendMessage(ref msg);
 			}
 		}
 
 		private void SendCommand(CommandType cmdType, byte[] data, string more = "") {
-			VMessage msg = new VMessage();
-			msg.msgType = MessageType.MSG_Command;
-			msg.cmdType = cmdType;
-			msg.payloadType = PayloadType.Command;
-			msg.data = data;
-			msg.comment = more;
+			VMessage msg = new() {
+				msgType = MessageType.MSG_Command,
+				cmdType = cmdType,
+				payloadType = PayloadType.Command,
+				data = data,
+				comment = more
+			};
 
 			SendMessage(ref msg);
 		}
 
 		private void SendInquiry(CommandType type) {
-			VMessage msg = new VMessage();
-			msg.msgType = MessageType.MSG_Inquiry;
-			msg.cmdType = type;
-			msg.payloadType = PayloadType.Inquiry;
+			VMessage msg = new() {
+				msgType = MessageType.MSG_Inquiry,
+				cmdType = type,
+				payloadType = PayloadType.Inquiry
+			};
 
 			SendMessage(ref msg);
 		}
@@ -658,38 +647,37 @@ namespace ViscaIP {
 
 		#region Receive
 
-		private void handleResponse(byte[] response) {
+		private void HandleResponse(byte[] response) {
 			string str = "";
 			foreach (byte b in response) {
 				str += b.ToString("X2") + " ";
 			}
 			//ResponseListAdd("Data received: " + str);
 			int count = response.Length;
-			string receiveString = "";
+			string receiveString;
 			if (count == 3) {
-				receiveString = handle3ByteResponse(response);
+				receiveString = Handle3ByteResponse(response);
 			} else if (count == 4) {
-				receiveString = "RCV: " + handle4ByteResponse(response);
+				receiveString = "RCV: " + Handle4ByteResponse(response);
 			} else if (count == 7) {
-				receiveString = "RCV: " + handle7ByteResponse(response);
+				receiveString = "RCV: " + Handle7ByteResponse(response);
 			} else if (count == 10) {
-				receiveString = "RCV: " + handle10ByteResponse(response);
+				receiveString = "RCV: " + Handle10ByteResponse(response);
 			} else {
 				receiveString = "Unknown";
 			}
 			
 			if (receiveString.Length > 0) {
-				DFO($"{receiveString.PadRight(25)} - {str}");
+				DFO($"{receiveString,-25} - {str}");
 			}
 
 			if (lastCmdType == CommandType.None) {
 				if (!msgQueue.Empty) {
-					VMessage msg = new VMessage();
+					VMessage msg = new();
 					msgQueue.Dequeue(ref msg);
 					SendMessage(ref msg);
 				}
 			}
-			Debug.WriteLine($"handleResponse() end, {lastCmdType}, {receiveString}");
 		}
 
 		private async void ShowMessage(string msg) {
@@ -702,7 +690,7 @@ namespace ViscaIP {
 			ResponseListAdd("Show: " + msg);
 			try {
 				this.DispatcherQueue.TryEnqueue(() => {
-					ContentDialog dialog = new ContentDialog {
+					ContentDialog dialog = new() {
 						Title = "ViscaUI Message",
 						Content = msg,
 						CloseButtonText = "OK",
@@ -722,27 +710,23 @@ namespace ViscaIP {
 			messageDialogShowing = false;
 		}
 
-		private string handle3ByteResponse(byte[] response) {
-			//Debug.WriteLine("handle 3 byte response");
+		private string Handle3ByteResponse(byte[] response) {
 			string rtn = "";
 			if ((response[1] & 0xF0) == 0x40) {
 				//rtn = "ACK: ";
 			} else if ((response[1] & 0xF0) == 0x50) {
 				rtn = "FIN: ";
-				Debug.WriteLine(rtn);
 				FinishMessage();
 			}
 
 			return rtn;
 		}
 
-		private string handle4ByteResponse(byte[] response) {
+		private string Handle4ByteResponse(byte[] response) {
 			string rtn = "";
-			Debug.WriteLine($"handle 4 byte: lastMsg: {lastCmdType}");
 			try {
 				if ((response[0] & 0x8F) == 0x80) {
 					if ((response[1] & 0xF0) == 0x60) {    // error message
-						Debug.WriteLine("Error message received");
 						switch (response[2]) {
 							case 0x41:
 								rtn = "invalid command ";
@@ -770,7 +754,7 @@ namespace ViscaIP {
 									ShowPowerState(false);
 									rtn = "Power Off";
 								}
-								setControlsState();
+								SetControlsState();
 								break;
 							case CommandType.INQ_FocusMode:
 								if (response[2] == 0x02) {
@@ -784,10 +768,10 @@ namespace ViscaIP {
 								break;
 							case CommandType.INQ_AEMode:
 								if (response[2] == 0x00) {
-									setBrightType(false);
+									SetBrightType(false);
 									rtn = "Exposure Auto ";
 								} else if (response[2] == 0x0D) {
-									setBrightType(true);
+									SetBrightType(true);
 									rtn = "Exposure Bright";
 								}
 								FinishMessage();
@@ -824,12 +808,11 @@ namespace ViscaIP {
 										bal = BalanceType.Manual;
 										break;
 								}
-								setBalanceType(bal);
+								SetBalanceType(bal);
 								rtn = "Balance Mode: " + bal.ToString();
 								FinishMessage();
 								break;	
 							case CommandType.INQ_ExpCompOn:
-								Debug.WriteLine("exp comp return");
 								bool on = false;
 								switch (response[2]) {
 									case 2:
@@ -839,7 +822,7 @@ namespace ViscaIP {
 										on = false;
 										break;
 								}
-								setExpComp(on);
+								SetExpComp(on);
 								break;
 						}
 					}
@@ -856,7 +839,7 @@ namespace ViscaIP {
 			return rtn;
 		}
 
-		private string handle7ByteResponse(byte[] response) {
+		private string Handle7ByteResponse(byte[] response) {
 			string rtn = "";
 			if (response[1] == 0x50) {  // inquiry response
 				if (lastCmdType == CommandType.INQ_BrightPos) {
@@ -906,12 +889,12 @@ namespace ViscaIP {
 			return rtn;
 		}
 
-		private string handle10ByteResponse(byte[] response) {
-			string rtn = "";
+		private static string Handle10ByteResponse(byte[] response) {
+			string rtn;
 			//int dev = response[0] & 0x7;
 			int vendorId = ((int)response[2]) << 8 + response[3];
 			int modelId = ((int)response[4]) << 8 + response[5];
-			int versionId = ((int)response[6]) << 8 + response[7];
+			//int versionId = ((int)response[6]) << 8 + response[7];
 			rtn = $"V: {vendorId}, M: {modelId} ";
 
 			return rtn;
@@ -938,34 +921,34 @@ namespace ViscaIP {
 		#endregion
 
 		#region Pan Tilt
-		private void panTiltStop() {
-			byte[] d = { panRate, tiltRate, 0x03, 0x03 };
+		private void PanTiltStop() {
+			byte[] d = [ 0x00, 0x00, 0x03, 0x03 ];
 			SendCommand(CommandType.CMD_PanTilt, d, "stop");
 		}
 
-		private void panTiltStart(byte b6, byte b7) {
-			byte[] d = { panRate, tiltRate, b6, b7 };
+		private void PanTiltStart(byte b6, byte b7) {
+			byte[] d = [ panRate, tiltRate, b6, b7 ];
 			SendCommand(CommandType.CMD_PanTilt, d, "start");
 		}
 
 		private void CenterBtnClick(object sender, RoutedEventArgs e) {
 			if ((modelFeatures != null) && (modelFeatures.Contains(ControlFeature.NoCenter))) {
-				byte[] d = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+				byte[] d = [ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ];
 				SendCommand(CommandType.CMD_PanTiltDirect, d, "center");
 			} else {
-				byte[] d = {  };
+				byte[] d = [  ];
 				SendCommand(CommandType.CMD_PanTiltHome, d, "center");
 			}
 		}
 
-		private void ptRect_MouseDown(object sender, PointerRoutedEventArgs e) {
+		private void PtRect_MouseDown(object sender, PointerRoutedEventArgs e) {
 			ptRectDragging = true;
-			ptRect_MouseMove(sender, e);
+		 PtRect_MouseMove(sender, e);
 		}
 
-		private void ptRect_MouseUp(object sender, PointerRoutedEventArgs e) {
+		private void PtRect_MouseUp(object _1, PointerRoutedEventArgs _2) {
 			ptRectDragging = false;
-			panTiltStop();
+			PanTiltStop();
 			lastPanRate = 0;
 			lastTiltRate = 0;
 		}
@@ -973,10 +956,10 @@ namespace ViscaIP {
 		const int ptRectWidth = 140;
 		const int ptInc = 10;
 		const int ptRectHeight = 120;
-		private static readonly int[] panRates = new[] { 1, 3, 6, 10, 15, 24 };
-		private static readonly int[] tiltRates = new[] { 1, 3, 6, 10, 1 };
+		private static readonly int[] panRates = [ 1, 3, 6, 10, 15, 24 ];
+		private static readonly int[] tiltRates = [ 1, 3, 6, 10, 15 ];
 
-		private void ptRect_MouseMove(object sender, PointerRoutedEventArgs e) {
+		private void PtRect_MouseMove(object _1, PointerRoutedEventArgs e) {
 			if (ptRectDragging) {
 				PointerPoint ptrPt = e.GetCurrentPoint(ptRect);
 				Point pos = ptrPt.Position;
@@ -987,11 +970,10 @@ namespace ViscaIP {
 				int pr = 0;
 				int tr = 0;
 
-				int xInd = Math.Min((int)(ax / ptInc), 6);
-				int yInd = Math.Min((int)(ay / ptInc), 5);
+				int xInd = Math.Min((int)(ax / ptInc), 5);
+				int yInd = Math.Min((int)(ay / ptInc), 4);
 				pr = panRates[xInd];
 				tr = tiltRates[yInd];
-
 				panRate = (byte)pr;
 				tiltRate = (byte)tr;
 
@@ -1007,11 +989,11 @@ namespace ViscaIP {
 
 				if (change) {
 					if ((tr == 0) && (pr == 0)) {
-						panTiltStop();
+						PanTiltStop();
 					} else {
-						byte lr = (byte)((pr == 0) ? 3 : ((x < 0) ? 1 : 2));
-						byte ud = (byte)((tr == 0) ? 3 : ((y < 0) ? 1 : 2));
-						panTiltStart(lr, ud);
+						byte lr = (byte)((xInd == 0) ? 3 : ((x < 0) ? 1 : 2));
+						byte ud = (byte)((yInd == 0) ? 3 : ((y < 0) ? 1 : 2));
+						PanTiltStart(lr, ud);
 					}
 					if (lastPresetNumber != -1) {
 						this.DispatcherQueue.TryEnqueue(() => {
@@ -1024,41 +1006,41 @@ namespace ViscaIP {
 		}
 		#endregion
 
-		#region Zooom
-		private void zoomStop() {
+		#region Zoom
+		private void ZoomStop() {
 			//ResponseListAdd("zoom stop");
-			byte[] d = { 0x00 };
+			byte[] d = [ 0x00 ];
 			SendCommand(CommandType.CMD_Zoom, d, "stop");
 		}
 
-		private void zoomIn() {
+		private void ZoomIn() {
 			byte cmd = (byte)(0x20 | zoomRate);
-			byte[] d = { cmd };
+			byte[] d = [ cmd ];
 			SendCommand(CommandType.CMD_Zoom, d, $"in {zoomRate}");
 		}
 
-		private void zoomOut() {
+		private void ZoomOut() {
 			byte cmd = (byte)(0x30 | zoomRate);
-			byte[] d = { cmd };
+			byte[] d = [ cmd ];
 			SendCommand(CommandType.CMD_Zoom, d, $"out {zoomRate}");
 		}
 
-		private void zmRect_MouseDown(object sender, PointerRoutedEventArgs e) {
+		private void ZmRect_MouseDown(object sender, PointerRoutedEventArgs e) {
 			zmRectDragging = true;
-			zmRect_MouseMove(sender, e);
+			ZmRect_MouseMove(sender, e);
 		}
 
-		private void zmRect_MouseUp(object sender, PointerRoutedEventArgs e) {
+		private void ZmRect_MouseUp(object _1, PointerRoutedEventArgs _2) {
 			zmRectDragging = false;
-			zoomStop();
+			ZoomStop();
 			lastZoomRate = 0;
 		}
 
 		const int zoomInc = 12;
 		const int zoomRectHeight = 120;
-		private static readonly int[] zoomRates = new[] { 1, 2, 4, 7 };
+		private static readonly int[] zoomRates = [ 1, 2, 4, 7 ];
 
-		private void zmRect_MouseMove(object sender, PointerRoutedEventArgs e) {
+		private void ZmRect_MouseMove(object _1, PointerRoutedEventArgs e) {
 			if (zmRectDragging) {
 				PointerPoint ptrPt = e.GetCurrentPoint(zmRect);
 				Point pos = ptrPt.Position;
@@ -1079,12 +1061,12 @@ namespace ViscaIP {
 
 				if (change) {
 					if (zr == 0) {
-						zoomStop();
+						ZoomStop();
 					} else {
 						if (y < 0) {
-							zoomIn();
+							ZoomIn();
 						} else {
-							zoomOut();
+							ZoomOut();
 						}
 						;
 					}
@@ -1116,8 +1098,8 @@ namespace ViscaIP {
 			}
 		}
 
-		private void NearBtnClick(object sender, RoutedEventArgs e) {
-			byte[] d = { 0x20 };
+		private void NearBtnClick(object _1, RoutedEventArgs _2) {
+			byte[] d = [ 0x20 ];
 			SendCommand(CommandType.CMD_Focus, d, $"near ");
 		}
 
@@ -1138,7 +1120,7 @@ namespace ViscaIP {
 			SendCommand(CommandType.CMD_Focus, d	, $"out {focusRate}");
 		}
 
-		private void FocusManualClick(object sender, RoutedEventArgs e) {
+		private void FocusManualClick(object _1, RoutedEventArgs _2) {
 			SetFocusType(focusManual.IsChecked == true);
 		}
 
@@ -1146,7 +1128,7 @@ namespace ViscaIP {
 			focusRectDragging = true;
 			FocusRect_MouseMove(sender, e);
 		}
-		private void FocusRect_MouseUp(object sender, PointerRoutedEventArgs e) {
+		private void FocusRect_MouseUp(object _1, PointerRoutedEventArgs _2) {
 			focusRectDragging = false;
 			FocusStop();
 			lastFocusRate = 0;
@@ -1220,18 +1202,15 @@ namespace ViscaIP {
 
 		#region Presets
 		private void PresetDown(object sender, PointerRoutedEventArgs e) {
-			Debug.WriteLine("PresetDown");
 			lastPreset = (Button)sender;
 			string? lpStr = lastPreset.Content.ToString();
 			lastPresetNumber = (lpStr is not null) ? int.Parse(lpStr) - 1 : 0;
 			settingPreset = false;
 			presetTimer = new System.Timers.Timer(1000) { Enabled = true };
 			presetTimer.Elapsed += PresetTimer_Tick;
-			Debug.WriteLine("PresetDown exit");
 		}
 
 		private void PresetUp(object sender, PointerRoutedEventArgs e) {
-			Debug.WriteLine("PresetUp");
 			if (presetTimer is not null) {
 				presetTimer.Stop();
 				presetTimer.Dispose();
@@ -1243,23 +1222,19 @@ namespace ViscaIP {
 				int btnNbr = int.Parse(btnStr) - 1;
 				HandlePreset((byte)(btnNbr), presetTimer);
 			}
-			Debug.WriteLine("PresetUp exit");
 		}
 
 		private void PresetTimer_Tick(object? sender, object e) {
-			Debug.WriteLine("PresetTick");
 			settingPreset = true;
 			this.DispatcherQueue.TryEnqueue(() => {
 				if (lastPreset is not null) {
 					presetPanels[lastPresetNumber].Background = new SolidColorBrush(Colors.Red);
-					Debug.WriteLine("preset timer set red");
 				}
 			});
 			if (presetTimer is not null) {
 				presetTimer.Stop();
 				presetTimer.Dispose();
 			}
-			Debug.WriteLine("PresetTick exit");
 		}
 
 		private void HandlePreset(byte number, System.Timers.Timer? presetTimer1) {
@@ -1287,7 +1262,6 @@ namespace ViscaIP {
 			}
 
 			settingPreset = false;
-			Debug.WriteLine("handlePreset exit");
 		}
 
 		private void PresetTextChanged(object sender, RoutedEventArgs e) {
@@ -1305,31 +1279,31 @@ namespace ViscaIP {
 			if (expManualChk.IsChecked == true) {
 				gainUpBtn.IsEnabled = true;
 				gainDownBtn.IsEnabled = true;
-				byte[] d = { 0x00 };
+				byte[] d = [ 0x00 ];
 				SendCommand(CommandType.CMD_ExposureMode, d, "manual");
 			} else {
 				gainUpBtn.IsEnabled = false;
 				gainDownBtn.IsEnabled = false;
-				byte[] d = { 0x03 };
+				byte[] d = [ 0x03 ];
 				SendCommand(CommandType.CMD_ExposureMode, d, "auto");
 			}
 		}
 
 		private void GainUp(object sender, RoutedEventArgs e) {
-			byte[] d = {};
+			byte[] d = [ ];
 			SendCommand(CommandType.CMD_ExpGain, d, "up");
 		}
 
 		private void GainDown(object sender, RoutedEventArgs e) {
-			byte[] d = {};
+			byte[] d = [ ];
 			SendCommand(CommandType.CMD_ExpGain, d, "down");
 		}
 
 		private void ExpBrightClick(object sender, RoutedEventArgs e) {
-			setBrightType(expBrightChk.IsChecked == true);
+			SetBrightType(expBrightChk.IsChecked == true);
 		}
 
-		private void displayBrightMode(bool manual) {
+		private void DisplayBrightMode(bool manual) {
 			this.DispatcherQueue.TryEnqueue(() => {
 				expBrightChk.IsChecked = manual;
 				//expSlider.IsEnabled = manual;
@@ -1346,16 +1320,16 @@ namespace ViscaIP {
 			});
 		}
 
-		private void setBrightType(bool manual) {
-			displayBrightMode(manual);
+		private void SetBrightType(bool manual) {
+			DisplayBrightMode(manual);
 
 			if (manual) {
-				setExpComp(false);
+				SetExpComp(false);
 			} else {
 				ShowExposure(0);
 			}
 
-			byte[] d = { (byte)(manual ? 0x0D : 0x00) };
+			byte[] d = [ (byte)(manual ? 0x0D : 0x00) ];
 			SendCommand(CommandType.CMD_ExposureMode, d, "manual");
 
 			if (!manual) {
@@ -1370,7 +1344,7 @@ namespace ViscaIP {
 				int value = (int)e.NewValue;
 				byte p = (byte)((value >> 4) & 1);
 				byte q = (byte)(value & 0x0F);
-				byte[] d = { 0x00, 0x00, p, q };
+				byte[] d = [ 0x00, 0x00, p, q ];
 				SendCommand(CommandType.CMD_ExposurePos, d, $"{value}");
 				//ShowExposure(value);
 			}
@@ -1379,13 +1353,13 @@ namespace ViscaIP {
 		private void ExpBacklitClick(object sender, RoutedEventArgs e) {
 			bool? chk = expBacklitChk.IsChecked;
 			if (chk.HasValue) {
-				setBacklight(chk.Value);
+				SetBacklight(chk.Value);
 			}
 		}
 
-		private void setBacklight(bool on) {
+		private void SetBacklight(bool on) {
 			if (lastCmdType == CommandType.None) {
-				byte[] d = {	(byte)(on ? 0x02 : 0x03) };
+				byte[] d = [ (byte)(on ? 0x02 : 0x03) ];
 				string more = $"backlight {(on ? "on" : "off")}";
 				SendCommand(CommandType.CMD_Backlight, d, more);
 			}
@@ -1394,14 +1368,14 @@ namespace ViscaIP {
 		private void ExpCompClick(object sender, RoutedEventArgs e) {
 			bool? chk = expCompChk.IsChecked;
 			if (chk.HasValue) {
-				setExpComp(chk.Value);
+				SetExpComp(chk.Value);
 			}
 		}
 
-		private void setExpComp(bool on) {
-			displayExpComp(on);
+		private void SetExpComp(bool on) {
+			DisplayExpComp(on);
 
-			byte[] d = { (byte)(on ? 0x02 : 0x03) };
+			byte[] d = [ (byte)(on ? 0x02 : 0x03) ];
 			string more = $"exposure comp {(on ? "on" : "off")}";
 			SendCommand(CommandType.CMD_ExpCompOn, d, more);
 
@@ -1410,7 +1384,7 @@ namespace ViscaIP {
 			}
 		}
 
-		private void displayExpComp(bool on) {
+		private void DisplayExpComp(bool on) {
 			this.DispatcherQueue.TryEnqueue(() => {
 				expCompChk.IsChecked = on;
 				expCompSlider.IsEnabled = on;
@@ -1428,24 +1402,24 @@ namespace ViscaIP {
 			int value = (int)e.NewValue;
 			byte p = 0;
 			byte q = (byte)(value & 0x0f);
-			byte[] d = { 0x00, 0x00, p, q };
+			byte[] d = [ 0x00, 0x00, p, q ];
 			SendCommand(CommandType.CMD_ExpCompPos, d, $"{value}");
 			ShowExposureComp(value);
 		}
 
 		private void ExpCompUp(object sender, RoutedEventArgs e) {
-			byte[] d = {};
+			byte[] d = [];
 			SendCommand(CommandType.CMD_ExpCompUpDn, d, "up");
 		}
 
 		private void ExpCompDown(object sender, RoutedEventArgs e) {
-			byte[] d = {};
+			byte[] d = [];
 			SendCommand(CommandType.CMD_ExpCompUpDn, d, "down");
 		}
 		#endregion
 
 		#region White Balance
-		private void balanceSetup() {
+		private void BalanceSetup() {
 			bool wbFull = (modelFeatures != null) && (modelFeatures.Contains(ControlFeature.WBFull));
 			wbSelectCombo.Items.Clear();
 			wbSelectCombo.Items.Add("Auto");
@@ -1462,7 +1436,7 @@ namespace ViscaIP {
 			wbSelectCombo.SelectedIndex = 0;
 		}
 
-		private void setBalanceType(BalanceType balance) {
+		private void SetBalanceType(BalanceType balance) {
 			balanceType = balance;
 
 			if (wbSelectCombo.Items.Count > 0) {
@@ -1476,7 +1450,7 @@ namespace ViscaIP {
 				wbBlueSlider.IsEnabled = manual;
 
 				if (manual) {
-					byte[] d = {};
+					byte[] d = [];
 					SendCommand(CommandType.CMD_BalanceMode, d, "manual");
 					if ((modelFeatures != null) && (modelFeatures.Contains(ControlFeature.WBFull))) {
 						wbRedButtonStack.Visibility = Visibility.Collapsed;
@@ -1491,7 +1465,7 @@ namespace ViscaIP {
 					}
 				} else {
 					if (wbAuto) {
-						byte[] d = { 0x00 };
+						byte[] d = [ 0x00 ];
 						SendCommand(CommandType.CMD_BalanceMode, d, "auto");
 					//} else if (onePush) {
 					//	byte[] d = { 0x35, 0x03 };
@@ -1529,7 +1503,7 @@ namespace ViscaIP {
 
 				byte p = (byte)(value >> 4);
 				byte q = (byte)(value & 0x0f);
-				byte[] d = { 0x00, 0x00, p, q };
+				byte[] d = [ 0x00, 0x00, p, q ];
 				SendCommand(CommandType.CMD_BalanceRed, d, $"red gain {value}");
 				//ShowGainText(wbRedText, value);
 			}
@@ -1540,7 +1514,7 @@ namespace ViscaIP {
 				int value = (int)e.NewValue;
 				byte p = (byte)(value >> 4);
 				byte q = (byte)(value & 0x0f);
-				byte[] d = { 0x00, 0x00, p, q };
+				byte[] d = [ 0x00, 0x00, p, q ];
 				SendCommand(CommandType.CMD_BalanceBlue, d, $"blue gain {value}");
 				//ShowGainText(wbBlueText, value);
 			}
@@ -1562,27 +1536,27 @@ namespace ViscaIP {
 				//	}
 				//}
 
-				setBalanceType(typ);
+				SetBalanceType(typ);
 			}
 		}
 
 		private void RedGainUp(object sender, RoutedEventArgs e) {
-			byte[] d = { 0x02 };
+			byte[] d = [ 0x02 ];
 			SendCommand(CommandType.CMD_RedUpDn, d, $"red gain up");
 		}
 
 		private void RedGainDown(object sender, RoutedEventArgs e) {
-			byte[] d = { 0x03 };
+			byte[] d = [ 0x03 ];
 			SendCommand(CommandType.CMD_RedUpDn, d, $"red gain down");
 		}
 
 		private void BlueGainUp(object sender, RoutedEventArgs e) {
-			byte[] d = { 0x02 };
+			byte[] d = [ 0x02 ];
 			SendCommand(CommandType.CMD_BlueUpDn, d, $"blue gain up");
 		}
 
 		private void BlueGainDown(object sender, RoutedEventArgs e) {
-			byte[] d = { 0x03 };
+			byte[] d = [ 0x03 ];
 			SendCommand(CommandType.CMD_BlueUpDn, d, $"blue gain down");
 		}
 
