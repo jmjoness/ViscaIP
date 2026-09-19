@@ -227,12 +227,15 @@
 					<TextBlock Text="Exposure" Foreground="Azure" TextAlignment="Center" Height="18" />
 					<Grid>
 						<Grid.ColumnDefinitions>
-							<ColumnDefinition Width="75" />
-							<ColumnDefinition Width="50" />
-							<ColumnDefinition Width="75" />
-							<ColumnDefinition Width="50" />
+							<ColumnDefinition Width="100" />
+							<ColumnDefinition Width="150" />
 						</Grid.ColumnDefinitions>
-						<StackPanel Grid.Column="0" Orientation="Vertical" Margin="10,10,0,0">
+						<Grid.RowDefinitions>
+							<RowDefinition Height="40" />
+							<RowDefinition Height="32" />
+							<RowDefinition Height="40" />
+						</Grid.RowDefinitions>
+						<StackPanel Grid.Row="0" Orientation="Horizontal" Margin="10,5,0,0">
 							<CheckBox x:Name="expManualChk" Click="ExpManualClick">
 								<CheckBox.ContentTemplate>
 									<DataTemplate>
@@ -242,7 +245,23 @@
 									</DataTemplate>
 								</CheckBox.ContentTemplate>
 							</CheckBox>
-							<CheckBox x:Name="expBrightChk" Click="ExpBrightClick">
+						</StackPanel>
+						<StackPanel x:Name="expSlideStack" Grid.Row="0" Grid.Column="1" Orientation="Vertical" Margin="0" >
+							<Slider x:Name="expSlider" Maximum="31" Orientation="Horizontal" Width="125" Margin="0,5,0,0" ValueChanged="ExpSliderChanged"/>
+							<!--<TextBox x:Name="expText" IsReadOnly="True" Text="Iris Gain" Foreground="Azure" Background="Transparent" BorderThickness="0" Height="20" MinHeight="16" FontSize="12" Margin="0" Padding="0" />-->
+						</StackPanel>
+						<StackPanel x:Name="gainButtonStack" Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Margin="0" >
+							<Button x:Name="gainUpBtn" HorizontalAlignment="Left" Width="40" Height="28" Background="Azure" Foreground="Black"
+										  Click="GainUp" Margin="6,6,0,0" VerticalAlignment="Top" >
+								<Image Source="ms-appx:///Assets/upbtn.svg" Width="16" Height="16"/>
+							</Button>
+							<Button x:Name="gainDownBtn" HorizontalAlignment="Left" Width="40" Height="28" Background="Azure" Foreground="Black"
+										  Click="GainDown" Margin="6,6,0,0" VerticalAlignment="Top" >
+								<Image Source="ms-appx:///Assets/dnbtn.svg" Width="16" Height="16"/>
+							</Button>
+						</StackPanel>
+						<StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Margin="10,5,0,0" BorderBrush="AntiqueWhite">
+							<!--<CheckBox x:Name="expBrightChk" Click="ExpBrightClick">
 								<CheckBox.ContentTemplate>
 									<DataTemplate>
 										<TextBlock Foreground="Azure" >
@@ -250,7 +269,7 @@
 										</TextBlock>
 									</DataTemplate>
 								</CheckBox.ContentTemplate>
-							</CheckBox>
+							</CheckBox>-->
 							<CheckBox x:Name="expBacklitChk" Click="ExpBacklitClick" >
 								<CheckBox.ContentTemplate>
 									<DataTemplate>
@@ -261,37 +280,23 @@
 								</CheckBox.ContentTemplate>
 							</CheckBox>
 						</StackPanel>
-						<StackPanel x:Name="expSlideStack" Grid.Column="1" Orientation="Vertical" Margin="0" BorderBrush="AntiqueWhite">
-							<Slider x:Name="expSlider" Maximum="31" Orientation="Vertical" Height="80" Margin="10,5,0,0" ValueChanged="ExpSliderChanged"/>
-							<TextBox x:Name="expText" IsReadOnly="True" Text="Iris Gain" Foreground="Azure" Background="Transparent" BorderThickness="0" Height="20" MinHeight="16" FontSize="12" Margin="0" Padding="0" />
-						</StackPanel>
-						<StackPanel x:Name="gainButtonStack" Grid.Column="1" Orientation="Vertical" Margin="0" >
-							<Button x:Name="gainUpBtn" HorizontalAlignment="Left" Width="40" Height="28" Background="Azure" Foreground="Black"
-										  Click="GainUp" Margin="6,6,0,0" VerticalAlignment="Top" >
-								<Image Source="ms-appx:///Assets/upbtn.svg" Width="16" Height="16"/>
-							</Button>
-							<Button x:Name="gainDownBtn" HorizontalAlignment="Left" Width="40" Height="28" Background="Azure" Foreground="Black"
-										  Click="GainDown" Margin="6,6,0,0" VerticalAlignment="Top" >
-								<Image Source="ms-appx:///Assets/dnbtn.svg" Width="16" Height="16"/>
-							</Button>
-						</StackPanel>
-						<StackPanel x:Name="expCompManStack" Grid.Column="2" Orientation="Vertical" Margin="10,10,0,0" BorderBrush="AntiqueWhite">
+						<StackPanel x:Name="expCompManStack" Grid.Row="2" Grid.Column="0" Orientation="Horizontal" Margin="10,5,0,0" >
 							<CheckBox x:Name="expCompChk" Click="ExpCompClick" >
 								<CheckBox.ContentTemplate>
 									<DataTemplate>
 										<TextBlock Foreground="Azure" >
-											Exp<LineBreak/>Comp
+											Cmp Man
 										</TextBlock>
 									</DataTemplate>
 								</CheckBox.ContentTemplate>
 							</CheckBox>
 						</StackPanel>
-						<StackPanel x:Name="expCompSlideStack" Grid.Column="3" Orientation="Vertical" Margin="0">
-							<Slider x:Name="expCompSlider" Maximum="14" Orientation="Vertical" Height="80" Margin="10,5,0,0" ValueChanged="ExpCompSliderChanged"/>
-							<TextBox x:Name="expCompText" IsReadOnly="True" Text="Comp" Foreground="Azure" Background="Transparent" BorderThickness="0" Height="20" MinHeight="16" FontSize="12" Margin="0" Padding="0" />
+						<StackPanel x:Name="expCompSlideStack" Grid.Row="2" Grid.Column="1" Orientation="Vertical" Margin="0,5,0,0">
+							<Slider x:Name="expCompSlider" Maximum="14" Orientation="Horizontal" Width="125" Margin="0,5,0,0" ValueChanged="ExpCompSliderChanged"/>
+							<!--<TextBox x:Name="expCompText" IsReadOnly="True" Text="Comp" Foreground="Azure" Background="Transparent" BorderThickness="0" Height="20" MinHeight="16" FontSize="12" Margin="0" Padding="0" />-->
 						</StackPanel>
-						<StackPanel x:Name="expCompButtonStack" Grid.Column="3" Orientation="Vertical" Margin="0">
-							<TextBox IsReadOnly="True" Text="Exp Comp" Foreground="Azure" Background="Transparent" BorderThickness="0" Height="20" MinHeight="16" FontSize="12" Margin="0" Padding="0" />
+						<StackPanel x:Name="expCompButtonStack" Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="0">
+							<!--<TextBox IsReadOnly="True" Text="Exp Comp" Foreground="Azure" Background="Transparent" BorderThickness="0" Height="20" MinHeight="16" FontSize="12" Margin="0" Padding="0" />-->
 							<Button x:Name="expCompUpBtn" HorizontalAlignment="Left" Width="40" Height="28" Background="Azure" Foreground="Black"
 										  Click="ExpCompUp" Margin="6,6,0,0" VerticalAlignment="Top" >
 								<Image Source="ms-appx:///Assets/upbtn.svg" Width="16" Height="16"/>

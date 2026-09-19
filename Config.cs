@@ -22,6 +22,7 @@ namespace ViscaIP {
 		const string CalibrationZMinStr = "CalibrationZMin";
 		const string CalibrationZMaxStr = "CalibrationZMax";
 
+		public readonly static string[] CameraVendorStrs = ["Sony", "AVer"];
 		public readonly static string[] CameraModelStrs = ["Sony BRC-X1000", "Sony SRG-X120", "AVer CAM520"];
 
 		static int m_number = 0;

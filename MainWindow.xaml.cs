@@ -128,8 +128,12 @@ namespace ViscaIP {
 			{ 0x505A, "CAM520" }
 		};
 
-		readonly uint NoWBManual = 0x01;
+		readonly uint NoWbManual = 0x01;
 		readonly	uint NoBrightDirect = 0x02;
+		readonly uint NoFocusRate = 0x04;
+		readonly uint NoPanTiltCenter = 0x08;
+		readonly uint NoWbInOut = 0x10;
+		readonly uint NoExpCompDirect = 0x20;
 
 		//readonly string[] IrisStrings = { " --", "F22", "F19", "F16", "F14", "F11", "F9.6", "F8.0", "F6.8", "F5.6", "F4.8",
 		//								 "F4.0", "F3.4", "F2.8", "F2.4", "F2.0", "F1.6", "F1.4", "F1.4", "F1.4", "F1.4",
@@ -190,6 +194,7 @@ namespace ViscaIP {
 		static int lastTiltRate = 0;
 		static int lastZoomRate = 0;
 		static int lastFocusRate = 0;
+		static int lastFocusYInd = 0;
 
 		static bool loggingOn = false;
 		static bool debugOn = false;
@@ -207,8 +212,8 @@ namespace ViscaIP {
 		public List<TextBox> presetTexts = [];
 		public List<Panel> presetPanels = [];
 		public List<RadioButton> deviceButtons = [];
-		public List<TextBox> cameraTexts = [];
-		public List<Button> ptzButtons = [];
+		//public List<TextBox> cameraTexts = [];
+		//public List<Button> ptzButtons = [];
 		public List<Control> focusControls = [];
 		public List<Control> exposureControls = [];
 
@@ -331,6 +336,11 @@ namespace ViscaIP {
 							model = camAry[4],
 							restrict = 0
 						};
+
+						if (info.model == "AVer CAM520") {
+							info.restrict = NoWbInOut | NoBrightDirect | NoFocusRate | NoPanTiltCenter | NoExpCompDirect;
+						}
+
 						deviceInfos.Add(info);
 						cameraCount++;
 						if (firstCamera == 0) {
@@ -348,6 +358,7 @@ namespace ViscaIP {
 
 				ShowPowerState(powerOn);
 				ShowCameras();
+				ShowFocusState(true);
 
 				RadioButton btn = deviceButtons[firstCamera - 1];
 				btn.IsChecked = true;
@@ -452,6 +463,7 @@ namespace ViscaIP {
 				DisplayBrightMode(false);
 				DisplayExpComp(false);
 				BalanceSetup();
+				ExposureSetup();
 			});
 		}
 
@@ -515,6 +527,7 @@ namespace ViscaIP {
 			if ((msg.cmdType == CommandType.CMD_PanTilt)
 				|| (msg.cmdType == CommandType.CMD_PanTiltRel)
 				|| (msg.cmdType == CommandType.CMD_PanTiltHome)
+				|| (msg.cmdType == CommandType.CMD_PanTiltDirect)
 				|| (msg.cmdType == CommandType.INQ_PanTiltPos)) {
 				typeByte = 0x06;
 			} else if (msg.cmdType == CommandType.INQ_DeviceType) {
@@ -932,12 +945,12 @@ namespace ViscaIP {
 		}
 
 		private void CenterBtnClick(object sender, RoutedEventArgs e) {
-			if ((modelFeatures != null) && (modelFeatures.Contains(ControlFeature.NoCenter))) {
+			if ((deviceInfos[(int)deviceId - 1].restrict & NoPanTiltCenter) == 0) {
+				byte[] d = [];
+				SendCommand(CommandType.CMD_PanTiltHome, d, "center");
+			} else {
 				byte[] d = [ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 ];
 				SendCommand(CommandType.CMD_PanTiltDirect, d, "center");
-			} else {
-				byte[] d = [  ];
-				SendCommand(CommandType.CMD_PanTiltHome, d, "center");
 			}
 		}
 
@@ -1038,7 +1051,7 @@ namespace ViscaIP {
 
 		const int zoomInc = 12;
 		const int zoomRectHeight = 120;
-		private static readonly int[] zoomRates = [ 1, 2, 4, 7 ];
+		private static readonly int[] zoomRates = [ 0, 1, 2, 4, 7 ];
 
 		private void ZmRect_MouseMove(object _1, PointerRoutedEventArgs e) {
 			if (zmRectDragging) {
@@ -1086,14 +1099,14 @@ namespace ViscaIP {
 		private void ShowFocusState(bool auto) {
 			this.DispatcherQueue.TryEnqueue(() => {
 				focusManual.IsChecked = !auto;
-				focusControlPanel.Visibility = !auto ? Visibility.Visible : Visibility.Collapsed;
+				focusRect.Visibility = !auto ? Visibility.Visible : Visibility.Collapsed;
 			});
 		}
 
 		private void SetFocusType(bool manual) {
 			focusRect.Visibility = manual ? Visibility.Visible : Visibility.Collapsed;
 			if (lastCmdType == CommandType.None) {
-				byte[] d = [ 0x38, (byte)(manual ? 0x03 : 0x02) ];
+				byte[] d = [ (byte)(manual ? 0x03 : 0x02) ];
 				SendCommand(CommandType.CMD_FocusMode, d, $"{(manual ? "manual" : "auto")}");
 			}
 		}
@@ -1136,7 +1149,7 @@ namespace ViscaIP {
 
 		const int focusInc = 9;
 		const int focusRectHeight = 90;
-		private static readonly int[] focusRates = [ 0, 1, 2, 4, 7 ];
+		private static readonly int[] focusRates = [ 0, 0, 1, 2, 4, 7 ];
 
 		private void FocusRect_MouseMove(object sender, PointerRoutedEventArgs e) {
 			if (focusRectDragging) {
@@ -1144,23 +1157,31 @@ namespace ViscaIP {
 				Point pos = ptrPt.Position;
 				double y = Math.Max(Math.Min(pos.Y, focusRectHeight), 0) - (focusRectHeight / 2);
 				double ay = Math.Abs(y);
-				int yInd = Math.Min((int)(ay / focusInc), 4);
-				int fr = focusRates[yInd];
-
-				if (ay >= 10) {
-					fr = (int)((Math.Log10(ay) - 1.0) * 6);
-				}
-
-				focusRate = (byte)fr;
-
+				int yInd = Math.Min((int)(ay / focusInc), 5);
 				bool change = false;
-				if (lastFocusRate != fr) {
-					lastFocusRate = fr;
-					change = true;
+
+				if ((deviceInfos[(int)deviceId - 1].restrict & NoFocusRate) == 0) {
+					int fr = focusRates[yInd];
+
+					if (ay >= 10) {
+						fr = (int)((Math.Log10(ay) - 1.0) * 6);
+					}
+
+					focusRate = (byte)fr;
+
+					if (lastFocusRate != fr) {
+						lastFocusRate = fr;
+						change = true;
+					}
+				} else {
+					focusRate = 0;
+					if (lastFocusYInd != yInd) {
+						change = true;
+					}
 				}
 
 				if (change) {
-					if (fr == 0) {
+					if (yInd == 0) {
 						FocusStop();
 					} else {
 						if (y < 0) {
@@ -1275,6 +1296,33 @@ namespace ViscaIP {
 		#endregion
 
 		#region Exposure
+		private void ExposureSetup() {
+			if ((deviceInfos[(int)deviceId - 1].restrict & NoBrightDirect) == 0) {
+				expSlideStack.Visibility = Visibility.Visible;
+				gainButtonStack.Visibility = Visibility.Collapsed;
+			} else {
+				expSlideStack.Visibility = Visibility.Collapsed;
+				gainButtonStack.Visibility = Visibility.Visible;
+			}
+
+			if ((deviceInfos[(int)deviceId - 1].restrict & NoExpCompDirect) == 0) {
+				//expCompChk.Visibility = Visibility.Visible;
+				expCompSlideStack.Visibility = Visibility.Visible;
+				expCompButtonStack.Visibility = Visibility.Collapsed;
+			} else {
+				//expCompChk.Visibility = Visibility.Collapsed;
+				expCompSlideStack.Visibility = Visibility.Collapsed;
+				expCompButtonStack.Visibility = Visibility.Visible;
+			}
+
+			bool expManual = (expManualChk.IsChecked == true);
+			gainUpBtn.IsEnabled = expManual;
+			gainDownBtn.IsEnabled = expManual;
+			SetBrightType(expManual);
+
+			DisplayExpComp(true);
+		}
+
 		private void ExpManualClick(object sender, RoutedEventArgs e) {
 			if (expManualChk.IsChecked == true) {
 				gainUpBtn.IsEnabled = true;
@@ -1290,22 +1338,22 @@ namespace ViscaIP {
 		}
 
 		private void GainUp(object sender, RoutedEventArgs e) {
-			byte[] d = [ ];
+			byte[] d = [ 0x02 ];
 			SendCommand(CommandType.CMD_ExpGain, d, "up");
 		}
 
 		private void GainDown(object sender, RoutedEventArgs e) {
-			byte[] d = [ ];
+			byte[] d = [ 0x03 ];
 			SendCommand(CommandType.CMD_ExpGain, d, "down");
 		}
 
-		private void ExpBrightClick(object sender, RoutedEventArgs e) {
-			SetBrightType(expBrightChk.IsChecked == true);
+		private void ExpBrightClick(object _1, RoutedEventArgs _2) {
+			SetBrightType(expManualChk.IsChecked == true);
 		}
 
 		private void DisplayBrightMode(bool manual) {
 			this.DispatcherQueue.TryEnqueue(() => {
-				expBrightChk.IsChecked = manual;
+				expManualChk.IsChecked = manual;
 				//expSlider.IsEnabled = manual;
 				//brightBtn.Enabled = manual;
 				//darkBtn.Enabled = manual;
@@ -1330,7 +1378,8 @@ namespace ViscaIP {
 			}
 
 			byte[] d = [ (byte)(manual ? 0x0D : 0x00) ];
-			SendCommand(CommandType.CMD_ExposureMode, d, "manual");
+			string str = manual ? "manual" : "auto";
+			SendCommand(CommandType.CMD_ExposureMode, d, str);
 
 			if (!manual) {
 				SendInquiry(CommandType.INQ_BacklightMode);
@@ -1358,11 +1407,11 @@ namespace ViscaIP {
 		}
 
 		private void SetBacklight(bool on) {
-			if (lastCmdType == CommandType.None) {
+			//if (lastCmdType == CommandType.None) {
 				byte[] d = [ (byte)(on ? 0x02 : 0x03) ];
 				string more = $"backlight {(on ? "on" : "off")}";
 				SendCommand(CommandType.CMD_Backlight, d, more);
-			}
+			//}
 		}
 
 		private void ExpCompClick(object sender, RoutedEventArgs e) {
@@ -1375,12 +1424,18 @@ namespace ViscaIP {
 		private void SetExpComp(bool on) {
 			DisplayExpComp(on);
 
-			byte[] d = [ (byte)(on ? 0x02 : 0x03) ];
-			string more = $"exposure comp {(on ? "on" : "off")}";
-			SendCommand(CommandType.CMD_ExpCompOn, d, more);
+			if ((deviceInfos[(int)deviceId - 1].restrict & NoExpCompDirect) == 0) {
+				byte[] d = [(byte)(on ? 0x02 : 0x03)];
+				string more = $"exposure comp {(on ? "on" : "off")}";
+				SendCommand(CommandType.CMD_ExpCompOn, d, more);
 
-			if (on) {
-				SendInquiry(CommandType.INQ_ExpCompPos);
+				if (on) {
+					SendInquiry(CommandType.INQ_ExpCompPos);
+				}
+			} else {
+				if (on) {
+					SetBacklight(false);
+				}
 			}
 		}
 
@@ -1388,6 +1443,8 @@ namespace ViscaIP {
 			this.DispatcherQueue.TryEnqueue(() => {
 				expCompChk.IsChecked = on;
 				expCompSlider.IsEnabled = on;
+				expCompUpBtn.IsEnabled = on;
+				expCompDownBtn.IsEnabled = on;
 			});
 		}
 
@@ -1408,30 +1465,41 @@ namespace ViscaIP {
 		}
 
 		private void ExpCompUp(object sender, RoutedEventArgs e) {
-			byte[] d = [];
+			byte[] d = [ 0x02 ];
 			SendCommand(CommandType.CMD_ExpCompUpDn, d, "up");
 		}
 
 		private void ExpCompDown(object sender, RoutedEventArgs e) {
-			byte[] d = [];
+			byte[] d = [ 0x03 ];
 			SendCommand(CommandType.CMD_ExpCompUpDn, d, "down");
 		}
 		#endregion
 
 		#region White Balance
 		private void BalanceSetup() {
-			bool wbFull = (modelFeatures != null) && (modelFeatures.Contains(ControlFeature.WBFull));
 			wbSelectCombo.Items.Clear();
 			wbSelectCombo.Items.Add("Auto");
-			if (wbFull) {
+
+			if ((deviceInfos[(int)deviceId - 1].restrict & NoWbInOut) == 0) {
 				wbSelectCombo.Items.Add("Indoor");
 				wbSelectCombo.Items.Add("Outdoor");
 			}
-			//wbSelectCombo.Items.Add("One Push");
-			//if (wbFull) {
-			//	wbSelectCombo.Items.Add("Auto Tracing");
-			//}
-			wbSelectCombo.Items.Add("Manual");
+
+			uint noManual = (deviceInfos[(int)deviceId - 1].restrict & NoWbManual);
+			Debug.WriteLine($"--- restrict | NoWbManual {deviceInfos[(int)deviceId - 1].restrict}, {NoWbManual}, {noManual}");
+
+			if ((deviceInfos[(int)deviceId - 1].restrict & NoWbManual) != 0) {
+				wbRedButtonStack.Visibility = Visibility.Collapsed;
+				wbBlueButtonStack.Visibility = Visibility.Collapsed;
+				wbRedSliderStack.Visibility = Visibility.Collapsed;
+				wbBlueSliderStack.Visibility = Visibility.Collapsed;
+			} else {
+				wbSelectCombo.Items.Add("Manual");
+				wbRedButtonStack.Visibility = Visibility.Visible;
+				wbBlueButtonStack.Visibility = Visibility.Visible;
+				wbRedSliderStack.Visibility = Visibility.Visible;
+				wbBlueSliderStack.Visibility = Visibility.Visible;
+			}
 
 			wbSelectCombo.SelectedIndex = 0;
 		}
